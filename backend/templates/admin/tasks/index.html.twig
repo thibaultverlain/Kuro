@@ -31,14 +31,14 @@
             {% for task in tasks %}
                 <tr>
                     <td>{{ task.id }}</td>
-                    <td>{{ task.taskTitle }}</td>
-                    <td>{{ task.taskDesc }}</td>
-                    <td>{{ task.taskDueDate ? task.taskDueDate|date('Y-m-d') : '' }}</td>
-                    <td>{{ task.taskCreatedAt ? task.taskCreatedAt|date('Y-m-d') : '' }}</td>
-                    <td>{{ task.taskLastChange ? task.taskLastChange|date('Y-m-d') : '' }}</td>
-                    <td>{{ task.getTaskPriority().getPriorityName() }}</td>
-                    <td>{{ task.getTaskStatus().getStatusName() }}</td>
-                    <td>{{ task.getTaskProject().getProjectName() }}</td>
+                    <td>{{ task.title }}</td>
+                    <td>{{ task.description }}</td>
+                    <td>{{ task.dueDate ? task.dueDate|date('Y-m-d') : '' }}</td>
+                    <td>{{ task.createdAt ? task.createdAt|date('Y-m-d') : '' }}</td>
+                    <td>{{ task.lastChangedAt ? task.lastChangedAt|date('Y-m-d') : '' }}</td>
+                    <td>{{ task.priority.name }}</td>
+                    <td>{{ task.status.name }}</td>
+                    <td>{{ task.project.name }}</td>
                     <td>
                         <a href="{{ path('admin_tasks_show', {'id': task.id}) }}" class="btn btn-sm btn-outline-info me-2">
                             <i class="bi bi-eye"></i> Voir

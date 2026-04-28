@@ -38,7 +38,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Project::class, mappedBy: 'users')]
     private Collection $projects;
 
-    #[ORM\ManyToMany(targetEntity: Tasks::class, inversedBy: 'users')]
+    #[ORM\ManyToMany(targetEntity: Task::class, inversedBy: 'users')]
     private Collection $tasks;
 
     #[ORM\Column]
@@ -48,24 +48,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private array $notificationPreferences = [
         'task_assigned' => true,
         'status_changed' => true,
-        'date_changed' => true,
-        'title_changed' => true,
-        'user_added' => true,
-        'task_deleted' => true,
+        'date_changed'   => true,
+        'title_changed'  => true,
+        'user_added'     => true,
+        'task_deleted'   => true,
     ];
 
-    /**
-     * @var Collection<int, Notification>
-     */
-    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'users')]
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user')]
     private Collection $notifications;
 
     public function __construct()
     {
         $this->projects = new ArrayCollection();
         $this->tasks = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
         $this->notifications = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -165,7 +162,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->tasks;
     }
 
-    public function addTask(Tasks $task): static
+    public function addTask(Task $task): static
     {
         if (!$this->tasks->contains($task)) {
             $this->tasks->add($task);
@@ -173,7 +170,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removeTask(Tasks $task): static
+    public function removeTask(Task $task): static
     {
         $this->tasks->removeElement($task);
         return $this;
@@ -201,9 +198,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Notification>
-     */
     public function getNotifications(): Collection
     {
         return $this->notifications;
@@ -213,22 +207,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->notifications->contains($notification)) {
             $this->notifications->add($notification);
-            $notification->setUsers($this);
+            $notification->setUser($this);
         }
-
         return $this;
     }
 
     public function removeNotification(Notification $notification): static
     {
         if ($this->notifications->removeElement($notification)) {
-            // set the owning side to null (unless already changed)
-            if ($notification->getUsers() === $this) {
-                $notification->setUsers(null);
+            if ($notification->getUser() === $this) {
+                $notification->setUser(null);
             }
         }
-
         return $this;
     }
-
 }

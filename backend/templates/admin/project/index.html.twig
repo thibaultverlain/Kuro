@@ -27,17 +27,17 @@
             {% for project in projects %}
                 <tr>
                     <td>{{ project.id }}</td>
-                    <td>{{ project.projectName }}</td>
-                    <td>{{ project.projectDesc }}</td>
-                    <td>{{ project.projectCreatedAt ? project.projectCreatedAt|date('d/m/Y') : '' }}</td>
+                    <td>{{ project.name }}</td>
+                    <td>{{ project.description }}</td>
+                    <td>{{ project.createdAt ? project.createdAt|date('d/m/Y') : '' }}</td>
                     <td>
-                        {% if project.getTasks() is not empty %}
+                        {% if project.tasks is not empty %}
                             <ul class="mb-0">
-                                {% for task in project.getTasks() %}
+                                {% for task in project.tasks %}
                                     <li>
-                                        {{ task.taskTitle }}
-                                        {% if task.taskDueDate %}
-                                            ({{ task.taskDueDate|date('d/m/Y') }})
+                                        {{ task.title }}
+                                        {% if task.dueDate %}
+                                            ({{ task.dueDate|date('d/m/Y') }})
                                         {% endif %}
                                     </li>
                                 {% endfor %}

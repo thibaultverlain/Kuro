@@ -2,94 +2,86 @@
 
 namespace App\Controller;
 
-use App\Entity\Notification;
-use App\Form\NotificationType;
 use App\Repository\NotificationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/notification')]
+#[IsGranted('ROLE_USER')]
 final class NotificationController extends AbstractController
 {
+    #[Route('', name: 'notifications_index', methods: ['GET'])]
+    public function index(NotificationRepository $repo): Response
+    {
+        $notifications = $repo->findBy(
+            ['user' => $this->getUser()],
+            ['createdAt' => 'DESC']
+        );
+
+        return $this->render('front/notification/index.html.twig', [
+            'notifications' => $notifications,
+        ]);
+    }
+
     #[Route('/ajax/unread', name: 'notifications_ajax_unread', methods: ['GET'])]
     public function unread(NotificationRepository $repo): Response
     {
-        $user = $this->getUser();
-
-        $notifications = $repo->findBy([
-            'users' => $user,
-            'isRead' => 0
-        ], ['createdAt' => 'DESC']);
+        $notifications = $repo->findBy(
+            ['user' => $this->getUser(), 'isRead' => false],
+            ['createdAt' => 'DESC']
+        );
 
         return $this->render('front/notification/_ajax_list.html.twig', [
-            'notifications' => $notifications
+            'notifications' => $notifications,
         ]);
     }
 
-    #[Route(name: 'app_notification_index', methods: ['GET'])]
-    public function index(NotificationRepository $notificationRepository): Response
-    {
-        return $this->render('front/notification/index.html.twig', [
-            'notifications' => $notificationRepository->findAll(),
-        ]);
-    }
+    #[Route('/{id}/read', name: 'notifications_mark_read', methods: ['POST'], requirements: ['id' => '\d+'])]
+    public function markRead(
+        int $id,
+        NotificationRepository $repo,
+        EntityManagerInterface $em,
+        Request $request
+    ): JsonResponse {
+        $notification = $repo->find($id);
 
-    #[Route('/new', name: 'app_notification_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $notification = new Notification();
-        $form = $this->createForm(NotificationType::class, $notification);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($notification);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_notification_index');
+        if (!$notification || $notification->getUser() !== $this->getUser()) {
+            return new JsonResponse(['error' => 'Introuvable'], 404);
         }
 
-        return $this->render('front/notification/new.html.twig', [
-            'notification' => $notification,
-            'form' => $form,
-        ]);
-    }
-
-    #[Route('/{id<\d+>}', name: 'app_notification_show', methods: ['GET'])]
-    public function show(Notification $notification): Response
-    {
-        return $this->render('front/notification/show.html.twig', [
-            'notification' => $notification,
-        ]);
-    }
-
-    #[Route('/{id<\d+>}/edit', name: 'app_notification_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Notification $notification, EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(NotificationType::class, $notification);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-            return $this->redirectToRoute('app_notification_index');
+        if (!$this->isCsrfTokenValid('notif_read', $request->request->get('_token'))) {
+            return new JsonResponse(['error' => 'Token invalide'], 400);
         }
 
-        return $this->render('front/notification/edit.html.twig', [
-            'notification' => $notification,
-            'form' => $form,
-        ]);
+        $notification->setIsRead(true);
+        $em->flush();
+
+        return new JsonResponse(['success' => true]);
     }
 
-    #[Route('/{id<\d+>}', name: 'app_notification_delete', methods: ['POST'])]
-    public function delete(Request $request, Notification $notification, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$notification->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($notification);
-            $entityManager->flush();
+    #[Route('/read-all', name: 'notifications_read_all', methods: ['POST'])]
+    public function markAllRead(
+        NotificationRepository $repo,
+        EntityManagerInterface $em,
+        Request $request
+    ): Response {
+        if (!$this->isCsrfTokenValid('notif_read_all', $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
         }
 
-        return $this->redirectToRoute('app_notification_index');
+        $notifications = $repo->findBy(['user' => $this->getUser(), 'isRead' => false]);
+
+        foreach ($notifications as $notification) {
+            $notification->setIsRead(true);
+        }
+
+        $em->flush();
+
+        return $this->redirectToRoute('notifications_index');
     }
 }

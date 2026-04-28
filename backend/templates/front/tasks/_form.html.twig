@@ -1,5 +1,5 @@
 {% if task is defined %}
-    {% if task.taskProject.users.contains(app.user) %}
+    {% if task.project.users.contains(app.user) %}
         {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
             <div class="mb-3">
                 {{ form_widget(form, {

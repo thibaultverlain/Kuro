@@ -17,26 +17,26 @@
                     </tr>
                     <tr>
                         <th scope="row">Nom</th>
-                        <td>{{ project.projectName }}</td>
+                        <td>{{ project.name }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Description</th>
-                        <td>{{ project.projectDesc }}</td>
+                        <td>{{ project.description }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Créé le</th>
-                        <td>{{ project.projectCreatedAt ? project.projectCreatedAt|date('d/m/Y') : '' }}</td>
+                        <td>{{ project.createdAt ? project.createdAt|date('d/m/Y') : '' }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Tâches</th>
                         <td>
-                            {% if project.getTasks() is not empty %}
+                            {% if project.tasks is not empty %}
                                 <ul class="mb-0">
-                                    {% for task in project.getTasks() %}
+                                    {% for task in project.tasks %}
                                         <li>
-                                            {{ task.taskTitle }}
-                                            {% if task.taskDueDate %}
-                                                ({{ task.taskDueDate|date('d/m/Y') }})
+                                            {{ task.title }}
+                                            {% if task.dueDate %}
+                                                ({{ task.dueDate|date('d/m/Y') }})
                                             {% endif %}
                                         </li>
                                     {% endfor %}

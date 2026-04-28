@@ -1,4 +1,4 @@
-<form method="post" action="{{ path('app_status_delete', {'id': status.id}) }}" 
+<form method="post" action="{{ path('admin_status_delete', {'id': status.id}) }}" 
       onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet élément ?');" 
       class="d-inline">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ status.id) }}">

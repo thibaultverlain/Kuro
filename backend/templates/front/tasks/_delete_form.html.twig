@@ -1,4 +1,4 @@
-{% if task.taskProject.users.contains(app.user) %}
+{% if task.project.users.contains(app.user) %}
 <form method="post"
       action="{{ path('front_tasks_delete', {'id': task.id}) }}"
       onsubmit="return confirm('Voulez-vous vraiment supprimer cette tâche ?');">

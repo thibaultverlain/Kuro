@@ -1,43 +1,47 @@
-<!DOCTYPE html>
+{% extends 'base_front.html.twig' %}
 
-<title>Notification index</title>
+{% block title %}Mes notifications{% endblock %}
 
 {% block body %}
-    <h1>Notification index</h1>
+<div class="container mt-5">
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Type</th>
-                <th>Message</th>
-                <th>Link</th>
-                <th>IsRead</th>
-                <th>CreateAt</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for notification in notifications %}
-            <tr>
-                <td>{{ notification.id }}</td>
-                <td>{{ notification.type }}</td>
-                <td>{{ notification.message }}</td>
-                <td>{{ notification.link }}</td>
-                <td>{{ notification.isRead ? 'Yes' : 'No' }}</td>
-                <td>{{ notification.createAt ? notification.createAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_notification_show', {'id': notification.id}) }}">show</a>
-                    <a href="{{ path('app_notification_edit', {'id': notification.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="7">no records found</td>
-            </tr>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h4 page-title">
+            <i class="fa-solid fa-bell me-2"></i>
+            Mes notifications
+        </h1>
+
+        {% if notifications|filter(n => not n.isRead)|length > 0 %}
+        <form method="post" action="{{ path('notifications_read_all') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('notif_read_all') }}">
+            <button class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-check2-all"></i> Tout marquer comme lu
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if notifications is empty %}
+        <p class="text-muted">Aucune notification.</p>
+    {% else %}
+        <ul class="list-group">
+        {% for n in notifications %}
+            <li class="list-group-item d-flex justify-content-between align-items-start {{ not n.isRead ? 'list-group-item-light fw-semibold' : '' }}">
+                <div>
+                    <small class="text-muted me-2">{{ n.createdAt|date('d/m/Y H:i') }}</small>
+                    {% if n.link %}
+                        <a href="{{ n.link }}">{{ n.message }}</a>
+                    {% else %}
+                        {{ n.message }}
+                    {% endif %}
+                </div>
+                {% if not n.isRead %}
+                    <span class="badge bg-primary rounded-pill">Nouveau</span>
+                {% endif %}
+            </li>
         {% endfor %}
-        </tbody>
-    </table>
+        </ul>
+    {% endif %}
 
-    <a href="{{ path('app_notification_new') }}">Create new</a>
+</div>
 {% endblock %}

@@ -17,35 +17,35 @@
                     </tr>
                     <tr>
                         <th scope="row">Titre</th>
-                        <td>{{ task.taskTitle }}</td>
+                        <td>{{ task.title }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Description</th>
-                        <td>{{ task.taskDesc }}</td>
+                        <td>{{ task.description }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Échéance</th>
-                        <td>{{ task.taskDueDate ? task.taskDueDate|date('Y-m-d') : '' }}</td>
+                        <td>{{ task.dueDate ? task.dueDate|date('Y-m-d') : '' }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Créée le</th>
-                        <td>{{ task.taskCreatedAt ? task.taskCreatedAt|date('Y-m-d') : '' }}</td>
+                        <td>{{ task.createdAt ? task.createdAt|date('Y-m-d') : '' }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Dernière modification</th>
-                        <td>{{ task.taskLastChange ? task.taskLastChange|date('Y-m-d') : '' }}</td>
+                        <td>{{ task.lastChangedAt ? task.lastChangedAt|date('Y-m-d') : '' }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Priorité</th>
-                        <td>{{ task.getTaskPriority().getPriorityName() }}</td>
+                        <td>{{ task.priority.name }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Statut</th>
-                        <td>{{ task.getTaskStatus().getStatusName() }}</td>
+                        <td>{{ task.status.name }}</td>
                     </tr>
                     <tr>
                         <th scope="row">Projet</th>
-                        <td>{{ task.getTaskProject().getProjectName() }}</td>
+                        <td>{{ task.project.name }}</td>
                     </tr>
                 </tbody>
             </table>

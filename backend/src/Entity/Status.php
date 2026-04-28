@@ -16,12 +16,9 @@ class Status
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $status_name = null;
+    private ?string $name = null;
 
-    /**
-     * @var Collection<int, Tasks>
-     */
-    #[ORM\OneToMany(targetEntity: Tasks::class, mappedBy: 'task_status')]
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'status')]
     private Collection $tasks;
 
     public function __construct()
@@ -34,45 +31,38 @@ class Status
         return $this->id;
     }
 
-    public function getStatusName(): ?string
+    public function getName(): ?string
     {
-        return $this->status_name;
+        return $this->name;
     }
 
-    public function setStatusName(string $status_name): static
+    public function setName(string $name): static
     {
-        $this->status_name = $status_name;
-
+        $this->name = $name;
         return $this;
     }
 
-    /**
-     * @return Collection<int, Tasks>
-     */
     public function getTasks(): Collection
     {
         return $this->tasks;
     }
 
-    public function addTask(Tasks $task): static
+    public function addTask(Task $task): static
     {
         if (!$this->tasks->contains($task)) {
             $this->tasks->add($task);
-            $task->setTaskStatus($this);
+            $task->setStatus($this);
         }
-
         return $this;
     }
 
-    public function removeTask(Tasks $task): static
+    public function removeTask(Task $task): static
     {
         if ($this->tasks->removeElement($task)) {
-            // set the owning side to null (unless already changed)
-            if ($task->getTaskStatus() === $this) {
-                $task->setTaskStatus(null);
+            if ($task->getStatus() === $this) {
+                $task->setStatus(null);
             }
         }
-
         return $this;
     }
 }

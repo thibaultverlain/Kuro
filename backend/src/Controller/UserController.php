@@ -8,41 +8,38 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/user')]
+#[IsGranted('ROLE_ADMIN')]
 class UserController extends AbstractController
 {
-    #[Route('/', name: 'user_index', methods: ['GET'])]
-    public function index(EntityManagerInterface $entityManager): Response
+    #[Route('', name: 'user_index', methods: ['GET'])]
+    public function index(EntityManagerInterface $em): Response
     {
-        $users = $entityManager->getRepository(User::class)->findAll();
-
         return $this->render('user/index.html.twig', [
-            'users' => $users,
+            'users' => $em->getRepository(User::class)->findAll(),
         ]);
     }
 
     #[Route('/new', name: 'user_new', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
-    {
+    public function new(
+        Request $request,
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $passwordHasher
+    ): Response {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Récupère le mot de passe en clair depuis le champ "plainPassword"
             $plainPassword = $form->get('plainPassword')->getData();
+            $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
 
-            // Hash le mot de passe
-            $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
-            $user->setPassword($hashedPassword);
-
-            $entityManager->persist($user);
-            $entityManager->flush();
+            $em->persist($user);
+            $em->flush();
 
             return $this->redirectToRoute('user_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -54,29 +51,28 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'user_show', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN')]
     public function show(User $user): Response
     {
-        return $this->render('user/show.html.twig', [
-            'user' => $user,
-        ]);
+        return $this->render('user/show.html.twig', ['user' => $user]);
     }
 
     #[Route('/{id}/edit', name: 'user_edit', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
-    {
+    public function edit(
+        Request $request,
+        User $user,
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $passwordHasher
+    ): Response {
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = $form->get('plainPassword')->getData();
             if ($plainPassword) {
-                $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
-                $user->setPassword($hashedPassword);
+                $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
             }
 
-            $entityManager->flush();
+            $em->flush();
 
             return $this->redirectToRoute('user_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -88,12 +84,11 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'user_delete', methods: ['POST'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, User $user, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($user);
-            $entityManager->flush();
+        if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
+            $em->remove($user);
+            $em->flush();
         }
 
         return $this->redirectToRoute('user_index', [], Response::HTTP_SEE_OTHER);

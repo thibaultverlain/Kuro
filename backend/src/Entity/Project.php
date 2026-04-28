@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProjectRepository::class)]
 class Project
@@ -17,15 +18,23 @@ class Project
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $project_name = null;
+    #[Assert\NotBlank(message: 'Le nom du projet ne peut pas être vide.')]
+    #[Assert\Length(
+        min: 2,
+        max: 255,
+        minMessage: 'Le nom doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.'
+    )]
+    private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $project_desc = null;
+    #[Assert\NotBlank(message: 'La description ne peut pas être vide.')]
+    private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private ?\DateTimeImmutable $project_createdAt = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\OneToMany(targetEntity: Tasks::class, mappedBy: 'task_project', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'project', orphanRemoval: true)]
     private Collection $tasks;
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'projects')]
@@ -36,75 +45,42 @@ class Project
     {
         $this->tasks = new ArrayCollection();
         $this->users = new ArrayCollection();
-        $this->project_createdAt = new \DateTimeImmutable();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    public function getId(): ?int { return $this->id; }
 
-    public function getProjectName(): ?string
-    {
-        return $this->project_name;
-    }
+    public function getName(): ?string { return $this->name; }
+    public function setName(string $name): static { $this->name = $name; return $this; }
 
-    public function setProjectName(string $project_name): static
-    {
-        $this->project_name = $project_name;
-        return $this;
-    }
+    public function getDescription(): ?string { return $this->description; }
+    public function setDescription(string $description): static { $this->description = $description; return $this; }
 
-    public function getProjectDesc(): ?string
-    {
-        return $this->project_desc;
-    }
+    public function getCreatedAt(): ?\DateTimeImmutable { return $this->createdAt; }
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static { $this->createdAt = $createdAt; return $this; }
 
-    public function setProjectDesc(string $project_desc): static
-    {
-        $this->project_desc = $project_desc;
-        return $this;
-    }
+    public function getTasks(): Collection { return $this->tasks; }
 
-    public function getProjectCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->project_createdAt;
-    }
-
-    public function setProjectCreatedAt(\DateTimeImmutable $project_createdAt): static
-    {
-        $this->project_createdAt = $project_createdAt;
-        return $this;
-    }
-
-    public function getTasks(): Collection
-    {
-        return $this->tasks;
-    }
-
-    public function addTask(Tasks $task): static
+    public function addTask(Task $task): static
     {
         if (!$this->tasks->contains($task)) {
             $this->tasks->add($task);
-            $task->setTaskProject($this);
+            $task->setProject($this);
         }
         return $this;
     }
 
-    public function removeTask(Tasks $task): static
+    public function removeTask(Task $task): static
     {
         if ($this->tasks->removeElement($task)) {
-            if ($task->getTaskProject() === $this) {
-                $task->setTaskProject(null);
+            if ($task->getProject() === $this) {
+                $task->setProject(null);
             }
         }
         return $this;
     }
 
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
+    public function getUsers(): Collection { return $this->users; }
 
     public function addUser(User $user): static
     {

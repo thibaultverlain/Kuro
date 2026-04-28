@@ -14,22 +14,22 @@ class ProjectType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('project_name', null, [
-                'label' => 'Nom du projet',
+            ->add('name', null, [
+                'label'    => 'Nom du projet',
                 'required' => true,
             ])
-            ->add('project_desc', null, [
-                'label' => 'Description',
+            ->add('description', null, [
+                'label'    => 'Description',
                 'required' => false,
             ])
             ->add('users', EntityType::class, [
-                'class' => User::class,
+                'class'        => User::class,
                 'choice_label' => fn(User $user) => $user->getName() ?: $user->getEmail(),
-                'multiple' => true,
-                'expanded' => true,
-                'required' => false,
-                'label' => 'Membres du projet',
-                'choices' => $options['available_users'], 
+                'multiple'     => true,
+                'expanded'     => true,
+                'required'     => false,
+                'label'        => 'Membres du projet',
+                'choices'      => $options['available_users'],
                 'by_reference' => false,
             ]);
     }
@@ -37,11 +37,10 @@ class ProjectType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Project::class,
+            'data_class'      => Project::class,
             'available_users' => [],
         ]);
 
-        // 🔒 Sécurisation de l’option
         $resolver->setAllowedTypes('available_users', ['array']);
     }
 }

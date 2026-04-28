@@ -15,7 +15,7 @@
             {# 🔒 Vérification stricte : l'utilisateur doit appartenir au projet #}
             {% set canCreate = false %}
             {% for t in tasks %}
-                {% if t.taskProject and t.taskProject.users.contains(app.user) %}
+                {% if t.project and t.project.users.contains(app.user) %}
                     {% set canCreate = true %}
                 {% endif %}
             {% endfor %}
@@ -23,10 +23,10 @@
             {# 🔒 Construction sécurisée de la liste des projets #}
             {% set projects = [] %}
             {% for t in tasks %}
-                {% if t.getTaskProject() 
-                    and t.getTaskProject().users.contains(app.user)
-                    and t.getTaskProject() not in projects %}
-                    {% set projects = projects|merge([t.getTaskProject()]) %}
+                {% if t.project 
+                    and t.project.users.contains(app.user)
+                    and t.project not in projects %}
+                    {% set projects = projects|merge([t.project]) %}
                 {% endif %}
             {% endfor %}
 
@@ -90,7 +90,7 @@
                     <option value="">Tous les projets</option>
                     {% for project in projects %}
                         {% if project.users.contains(app.user) %}
-                            <option value="{{ project.projectName }}">{{ project.projectName }}</option>
+                            <option value="{{ project.name }}">{{ project.name }}</option>
                         {% endif %}
                     {% endfor %}
                 </select>
@@ -113,14 +113,14 @@
             <div class="kanban-column-t">
                 <div class="kanban-title-t">
                     <i class="bi bi-folder2-open"></i>
-                    {{ project.projectName }}
+                    {{ project.name }}
                 </div>
 
                 {% set tasksForProject = [] %}
                 {% for t in tasks %}
-                    {% if t.getTaskProject() 
-                        and t.getTaskProject().id == project.id
-                        and t.getTaskProject().users.contains(app.user) %}
+                    {% if t.project 
+                        and t.project.id == project.id
+                        and t.project.users.contains(app.user) %}
                         {% set tasksForProject = tasksForProject|merge([t]) %}
                     {% endif %}
                 {% endfor %}
@@ -131,23 +131,23 @@
 
                             <div class="task-header">
                                 <div class="task-title-section">
-                                    <strong class="task-title">{{ t.getTaskTitle() }}</strong>
-                                    {% if t.getTaskDesc() %}
-                                        <small class="task-description">{{ t.getTaskDesc() }}</small>
+                                    <strong class="task-title">{{ t.title }}</strong>
+                                    {% if t.description %}
+                                        <small class="task-description">{{ t.description }}</small>
                                     {% endif %}
                                 </div>
-                                {% if t.getTaskDueDate() %}
+                                {% if t.dueDate %}
                                     <span class="task-date">
                                         <i class="bi bi-calendar-event"></i>
-                                        {{ t.getTaskDueDate()|date('d F Y') }}
+                                        {{ t.dueDate|date('d F Y') }}
                                     </span>
                                 {% endif %}
                             </div>
 
                             <div class="task-meta">
 
-                                {% if t.getTaskPriority() %}
-                                    {% set priorityName = t.getTaskPriority().getPriorityName() %}
+                                {% if t.priority %}
+                                    {% set priorityName = t.priority.name %}
                                     {% set priorityMap = {
                                         'Tres faible': 'tres-faible',
                                         'Faible': 'faible',
@@ -162,8 +162,8 @@
                                     </span>
                                 {% endif %}
 
-                                {% if t.getTaskStatus() %}
-                                    {% set statusName = t.getTaskStatus().getStatusName() %}
+                                {% if t.status %}
+                                    {% set statusName = t.status.name %}
                                     {% set statusMap = {
                                         'En cours': 'en-cours',
                                         'Terminee': 'termine',
@@ -177,16 +177,16 @@
                                     </span>
                                 {% endif %}
 
-                                {% if t.getTaskCreatedAt() %}
+                                {% if t.createdAt %}
                                     <span class="meta-pill">
                                         <i class="bi bi-plus-circle"></i>
-                                        {{ t.getTaskCreatedAt()|date('d F Y') }}
+                                        {{ t.createdAt|date('d F Y') }}
                                     </span>
                                 {% endif %}
-                                {% if t.getTaskLastChange() %}
+                                {% if t.lastChangedAt %}
                                     <span class="meta-pill">
                                         <i class="bi bi-pencil"></i>
-                                        {{ t.getTaskLastChange()|date('d F Y') }}
+                                        {{ t.lastChangedAt|date('d F Y') }}
                                     </span>
                                 {% endif %}
                             </div>
@@ -196,7 +196,7 @@
                                     <i class="bi bi-eye"></i> Voir
                                 </a>
 
-                                {% if t.taskProject.users.contains(app.user) %}
+                                {% if t.project.users.contains(app.user) %}
                                     <a href="{{ path('front_tasks_edit', {'id': t.id}) }}" class="btn-glass btn-small">
                                         <i class="bi bi-pencil"></i> Modifier
                                     </a>

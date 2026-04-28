@@ -5,16 +5,19 @@ namespace App\Controller\Admin;
 use App\Entity\Project;
 use App\Form\ProjectType;
 use App\Repository\ProjectRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/admin/project')]
+#[IsGranted('ROLE_ADMIN')]
 final class ProjectController extends AbstractController
 {
-    #[Route('/', name: 'admin_project_index', methods: ['GET'])]
+    #[Route('', name: 'admin_project_index', methods: ['GET'])]
     public function index(ProjectRepository $projectRepository): Response
     {
         return $this->render('admin/project/index.html.twig', [
@@ -23,57 +26,66 @@ final class ProjectController extends AbstractController
     }
 
     #[Route('/new', name: 'admin_project_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
+    public function new(
+        Request $request,
+        EntityManagerInterface $em,
+        UserRepository $userRepository
+    ): Response {
         $project = new Project();
-        $form = $this->createForm(ProjectType::class, $project);
+        $form = $this->createForm(ProjectType::class, $project, [
+            'available_users' => $userRepository->findAll(),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($project);
-            $entityManager->flush();
+            $em->persist($project);
+            $em->flush();
 
             return $this->redirectToRoute('admin_project_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('admin/project/new.html.twig', [
             'project' => $project,
-            'form' => $form,
+            'form'    => $form,
         ]);
     }
 
     #[Route('/{id}', name: 'admin_project_show', methods: ['GET'])]
     public function show(Project $project): Response
     {
-        return $this->render('admin/project/show.html.twig', [
-            'project' => $project,
-        ]);
+        return $this->render('admin/project/show.html.twig', ['project' => $project]);
     }
 
     #[Route('/{id}/edit', name: 'admin_project_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Project $project, EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(ProjectType::class, $project);
+    public function edit(
+        Request $request,
+        Project $project,
+        EntityManagerInterface $em,
+        UserRepository $userRepository
+    ): Response {
+        $form = $this->createForm(ProjectType::class, $project, [
+            'available_users' => $userRepository->findAll(),
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+            $em->flush();
 
             return $this->redirectToRoute('admin_project_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('admin/project/edit.html.twig', [
             'project' => $project,
-            'form' => $form,
+            'form'    => $form,
         ]);
     }
 
     #[Route('/{id}', name: 'admin_project_delete', methods: ['POST'])]
-    public function delete(Request $request, Project $project, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Project $project, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$project->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($project);
-            $entityManager->flush();
+        if ($this->isCsrfTokenValid('delete' . $project->getId(), $request->getPayload()->getString('_token'))) {
+            $em->remove($project);
+            $em->flush();
         }
 
         return $this->redirectToRoute('admin_project_index', [], Response::HTTP_SEE_OTHER);

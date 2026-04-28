@@ -26,7 +26,7 @@ class ProjectRepository extends ServiceEntityRepository
             ->innerJoin('p.users', 'u')
             ->andWhere('u = :user')
             ->setParameter('user', $user)
-            ->orderBy('p.project_createdAt', 'DESC')
+            ->orderBy('p.createdAt', 'DESC')
             ->addOrderBy('p.id', 'DESC')
             ->getQuery()
             ->getResult();

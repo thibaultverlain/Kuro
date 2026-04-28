@@ -31,16 +31,16 @@
     <!-- Carte du projet -->
     <div class="project-card">
         <div class="card-header">
-            <h5 class="project-title">{{ project.projectName }}</h5>
+            <h5 class="project-title">{{ project.name }}</h5>
             <span class="project-date">
                 <i class="fa-regular fa-calendar"></i>
-                {{ project.projectCreatedAt ? project.projectCreatedAt|date('d/m/Y') : '' }}
+                {{ project.createdAt ? project.createdAt|date('d/m/Y') : '' }}
             </span>
         </div>
 
         <p class="project-desc">
             <i class="fa-solid fa-align-left me-2"></i>
-            {{ project.projectDesc }}
+            {{ project.description }}
         </p>
 
         <div class="project-tasks">
@@ -71,8 +71,8 @@
 
                         <div class="tasks-list">
                             {% set tasks = [] %}
-                            {% for task in project.getTasks() %}
-                                {% if task.getTaskStatus() and task.getTaskStatus().statusName == status %}
+                            {% for task in project.tasks %}
+                                {% if task.status and task.status.name == status %}
                                     {% set tasks = tasks|merge([task]) %}
                                 {% endif %}
                             {% endfor %}
@@ -82,18 +82,18 @@
                                     <div class="task-card" data-task-id="{{ task.id }}">
                                         <div class="task-header drag-handle" title="Glisser pour déplacer">
                                             <a href="{{ path('front_tasks_show', {'id': task.id}) }}" class="task-title-link">
-                                                <strong class="task-title">{{ task.taskTitle }}</strong>
+                                                <strong class="task-title">{{ task.title }}</strong>
                                             </a>
-                                            {% if task.taskDueDate %}
+                                            {% if task.dueDate %}
                                                 <span class="task-date">
                                                     <i class="fa-regular fa-clock"></i>
-                                                    {{ task.taskDueDate|date('d/m/Y') }}
+                                                    {{ task.dueDate|date('d/m/Y') }}
                                                 </span>
                                             {% endif %}
                                         </div>
 
-                                        {% if task.getTaskPriority() %}
-                                            {% set priorityName = task.getTaskPriority().getPriorityName() %}
+                                        {% if task.priority %}
+                                            {% set priorityName = task.priority.name %}
                                             {% set priorityMap = {
                                                 'Tres faible': 'tres-faible',
                                                 'Faible': 'faible',

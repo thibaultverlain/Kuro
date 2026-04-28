@@ -11,7 +11,7 @@
                 <div class="col-md-4 mb-4">
                     <a href="{{ path('front_project_show', {id: project.id}) }}" class="card project-card text-decoration-none">
                         <div class="card-body">
-                            <h5 class="card-title">{{ project.projectName }}</h5>
+                            <h5 class="card-title">{{ project.name }}</h5>
                         </div>
                     </a>
                 </div>
@@ -53,8 +53,8 @@
                     {% set enRetard = 0 %}
 
                     {% for task in tasks %}
-                        {% if task.taskProject.users.contains(app.user) and user.tasks.contains(task) %}
-                            {% set status = task.taskStatus.statusName %}
+                        {% if task.project.users.contains(app.user) and user.tasks.contains(task) %}
+                            {% set status = task.status.name %}
 
                             {% if status == 'En cours' %}
                                 {% set enCours = enCours + 1 %}

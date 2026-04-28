@@ -15,7 +15,7 @@ class Notification
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'notifications')]
-    private ?User $users = null;
+    private ?User $user = null;
 
     #[ORM\Column(length: 255)]
     private ?string $type = null;
@@ -23,29 +23,34 @@ class Notification
     #[ORM\Column(type: Types::TEXT)]
     private ?string $message = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $link = null;
 
     #[ORM\Column]
-    private ?bool $isRead = null;
+    private bool $isRead = false;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
+
+    public function __construct()
+    {
+        $this->createdAt = new \DateTimeImmutable();
+        $this->isRead = false;
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUsers(): ?User
+    public function getUser(): ?User
     {
-        return $this->users;
+        return $this->user;
     }
 
-    public function setUsers(?User $users): static
+    public function setUser(?User $user): static
     {
-        $this->users = $users;
-
+        $this->user = $user;
         return $this;
     }
 
@@ -57,7 +62,6 @@ class Notification
     public function setType(string $type): static
     {
         $this->type = $type;
-
         return $this;
     }
 
@@ -69,7 +73,6 @@ class Notification
     public function setMessage(string $message): static
     {
         $this->message = $message;
-
         return $this;
     }
 
@@ -78,14 +81,13 @@ class Notification
         return $this->link;
     }
 
-    public function setLink(string $link): static
+    public function setLink(?string $link): static
     {
         $this->link = $link;
-
         return $this;
     }
 
-    public function isRead(): ?bool
+    public function isRead(): bool
     {
         return $this->isRead;
     }
@@ -93,7 +95,6 @@ class Notification
     public function setIsRead(bool $isRead): static
     {
         $this->isRead = $isRead;
-
         return $this;
     }
 
@@ -105,7 +106,6 @@ class Notification
     public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 }

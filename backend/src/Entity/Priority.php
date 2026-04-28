@@ -16,12 +16,9 @@ class Priority
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $priority_name = null;
+    private ?string $name = null;
 
-    /**
-     * @var Collection<int, Tasks>
-     */
-    #[ORM\OneToMany(targetEntity: Tasks::class, mappedBy: 'task_priority')]
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: 'priority')]
     private Collection $tasks;
 
     public function __construct()
@@ -34,45 +31,38 @@ class Priority
         return $this->id;
     }
 
-    public function getPriorityName(): ?string
+    public function getName(): ?string
     {
-        return $this->priority_name;
+        return $this->name;
     }
 
-    public function setPriorityName(string $priority_name): static
+    public function setName(string $name): static
     {
-        $this->priority_name = $priority_name;
-
+        $this->name = $name;
         return $this;
     }
 
-    /**
-     * @return Collection<int, Tasks>
-     */
     public function getTasks(): Collection
     {
         return $this->tasks;
     }
 
-    public function addTask(Tasks $task): static
+    public function addTask(Task $task): static
     {
         if (!$this->tasks->contains($task)) {
             $this->tasks->add($task);
-            $task->setTaskPriority($this);
+            $task->setPriority($this);
         }
-
         return $this;
     }
 
-    public function removeTask(Tasks $task): static
+    public function removeTask(Task $task): static
     {
         if ($this->tasks->removeElement($task)) {
-            // set the owning side to null (unless already changed)
-            if ($task->getTaskPriority() === $this) {
-                $task->setTaskPriority(null);
+            if ($task->getPriority() === $this) {
+                $task->setPriority(null);
             }
         }
-
         return $this;
     }
 }
