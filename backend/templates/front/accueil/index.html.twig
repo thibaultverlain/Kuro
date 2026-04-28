@@ -58,7 +58,7 @@
 
                             {% if status == 'En cours' %}
                                 {% set enCours = enCours + 1 %}
-                            {% elseif status == 'En attente' %}
+                            {% elseif status == 'À faire' %}
                                 {% set enAttente = enAttente + 1 %}
                             {% elseif status == 'Terminée' %}
                                 {% set terminee = terminee + 1 %}
@@ -95,7 +95,7 @@ const projectsData = {{ projectsData|json_encode|raw }};
 const labels = Object.keys(projectsData);
 
 const enCours = labels.map(p => projectsData[p]['En cours']);
-const terminee = labels.map(p => projectsData[p]['Terminee']);
+const terminee = labels.map(p => projectsData[p]['Terminée']);
 const enRetard = labels.map(p => projectsData[p]['En retard']);
 const enAttente = labels.map(p => projectsData[p]['En attente']);
 

@@ -16,7 +16,6 @@ class TaskRepository extends ServiceEntityRepository
 
     /**
      * Retourne uniquement les tâches appartenant aux projets dont l'utilisateur est membre.
-     * Évite de charger toutes les tâches de la base en mémoire.
      *
      * @return Task[]
      */
@@ -28,6 +27,53 @@ class TaskRepository extends ServiceEntityRepository
             ->andWhere('u = :user')
             ->setParameter('user', $user)
             ->orderBy('t.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Recherche et filtre les tâches accessibles à l'utilisateur.
+     *
+     * @return Task[]
+     */
+    public function search(
+        User $currentUser,
+        string $query = '',
+        ?string $status = null,
+        ?int $projectId = null,
+        ?int $assignedUserId = null
+    ): array {
+        $qb = $this->createQueryBuilder('t')
+            ->innerJoin('t.project', 'p')
+            ->innerJoin('p.users', 'member')
+            ->leftJoin('t.status', 's')
+            ->leftJoin('t.users', 'assigned')
+            ->andWhere('member = :currentUser')
+            ->setParameter('currentUser', $currentUser);
+
+        if ($query !== '') {
+            $qb->andWhere('t.title LIKE :q OR t.description LIKE :q')
+               ->setParameter('q', '%' . $query . '%');
+        }
+
+        if ($status !== null) {
+            $qb->andWhere('s.name = :status')
+               ->setParameter('status', $status);
+        }
+
+        if ($projectId !== null) {
+            $qb->andWhere('p.id = :projectId')
+               ->setParameter('projectId', $projectId);
+        }
+
+        if ($assignedUserId !== null) {
+            $qb->andWhere('assigned.id = :assignedUser')
+               ->setParameter('assignedUser', $assignedUserId);
+        }
+
+        return $qb
+            ->orderBy('t.createdAt', 'DESC')
+            ->distinct()
             ->getQuery()
             ->getResult();
     }
