@@ -51,7 +51,7 @@
                     <select name="project" class="form-select">
                         <option value="">Tous les projets</option>
                         {% for p in projects %}
-                            <option value="{{ p.id }}" {{ projectFilter == p.id|string ? 'selected' : '' }}>
+                            <option value="{{ p.id }}" {{ projectFilter == (p.id ~ '') ? 'selected' : '' }}>
                                 {{ p.name }}
                             </option>
                         {% endfor %}
