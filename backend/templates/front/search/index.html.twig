@@ -1,6 +1,6 @@
 {% extends 'base_front.html.twig' %}
 
-{% block title %}Recherche{% endblock %}
+{% block title %}Recherche — Kuro{% endblock %}
 
 {% block body %}
 <div class="container mt-5">
@@ -9,15 +9,15 @@
         <div class="header-content">
             <div class="header-title-section">
                 <h1 class="modern-title">
-                    <i class="bi bi-search me-2"></i> Recherche & Filtres
+                    <i class="bi bi-search me-2"></i>Recherche
                 </h1>
-                <p class="header-subtitle">Trouvez rapidement vos tâches</p>
+                <p class="header-subtitle">Filtrez vos tâches par mot-clé, statut ou projet</p>
             </div>
         </div>
     </div>
 
     {# Formulaire de recherche #}
-    <div class="filters-wrapper mb-5">
+    <div class="filters-wrapper mb-4">
         <form method="get" action="{{ path('front_search') }}">
             <div class="filters-grid">
 
@@ -32,13 +32,14 @@
 
                 <div class="filter-item">
                     <label class="filter-label">
-                        <i class="bi bi-check-circle"></i> Statut
+                        <i class="bi bi-circle-half"></i> Statut
                     </label>
                     <select name="status" class="form-select">
                         <option value="">Tous les statuts</option>
-                        {% for s in ['En cours', 'En attente', 'Terminee', 'En retard'] %}
-                            <option value="{{ s }}" {{ statusFilter == s ? 'selected' : '' }}>
-                                {{ s }}
+                        {% for status in statuses %}
+                            <option value="{{ status.name }}"
+                                {{ statusFilter == status.name ? 'selected' : '' }}>
+                                {{ status.name }}
                             </option>
                         {% endfor %}
                     </select>
@@ -46,13 +47,14 @@
 
                 <div class="filter-item">
                     <label class="filter-label">
-                        <i class="bi bi-folder"></i> Projet
+                        <i class="bi bi-folder2"></i> Projet
                     </label>
                     <select name="project" class="form-select">
                         <option value="">Tous les projets</option>
-                        {% for p in projects %}
-                            <option value="{{ p.id }}" {{ projectFilter == (p.id ~ '') ? 'selected' : '' }}>
-                                {{ p.name }}
+                        {% for project in projects %}
+                            <option value="{{ project.id }}"
+                                {{ projectFilter == project.id|string ? 'selected' : '' }}>
+                                {{ project.name }}
                             </option>
                         {% endfor %}
                     </select>
@@ -65,20 +67,23 @@
                     <i class="bi bi-search"></i> Rechercher
                 </button>
                 <a href="{{ path('front_search') }}" class="btn-reset ms-2">
-                    <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser
+                    <i class="bi bi-x-circle"></i> Réinitialiser
                 </a>
             </div>
         </form>
     </div>
 
     {# Résultats #}
-    {% if query != '' or statusFilter != '' or projectFilter != '' or userFilter != '' %}
-        <h2 class="block-title mb-3">
-            {{ tasks|length }} résultat{{ tasks|length > 1 ? 's' : '' }} trouvé{{ tasks|length > 1 ? 's' : '' }}
-        </h2>
+    {% if hasFilter %}
+        <div class="block-title mb-3">
+            {{ tasks|length }} résultat{{ tasks|length > 1 ? 's' : '' }}
+        </div>
 
         {% if tasks is empty %}
-            <p class="text-muted">Aucune tâche ne correspond à vos critères.</p>
+            <div class="dashboard-block text-center py-5">
+                <i class="bi bi-search" style="font-size:2rem;opacity:.3;display:block;margin-bottom:1rem"></i>
+                <p style="color:var(--text-muted)">Aucune tâche ne correspond à vos critères.</p>
+            </div>
         {% else %}
             <div class="kanban-board-t">
                 {% for task in tasks %}
@@ -87,11 +92,13 @@
                             <div class="task-title-section">
                                 <strong class="task-title">{{ task.title }}</strong>
                                 {% if task.description %}
-                                    <small class="task-description">{{ task.description }}</small>
+                                    <small class="task-description">
+                                        {{ task.description|slice(0, 100) }}{% if task.description|length > 100 %}…{% endif %}
+                                    </small>
                                 {% endif %}
                             </div>
                             {% if task.dueDate %}
-                                <span class="task-date">
+                                <span class="task-date {{ task.isLate ? 'text-danger' : '' }}">
                                     <i class="bi bi-calendar-event"></i>
                                     {{ task.dueDate|date('d/m/Y') }}
                                 </span>
@@ -107,40 +114,38 @@
                             {% endif %}
 
                             {% if task.status %}
-                                {% set statusName = task.status.name %}
-                                {% set statusMap = {
-                                    'En cours': 'en-cours',
-                                    'Terminee': 'termine',
+                                {% set sName = task.status.name %}
+                                {% set sMap = {
+                                    'En cours':  'en-cours',
+                                    'Terminée':  'termine',
                                     'En retard': 'retard',
-                                    'En attente': 'en-attente'
+                                    'À faire':   'en-attente'
                                 } %}
-                                {% set statusClass = statusMap[statusName]|default('') %}
-                                <span class="status-badge {{ statusClass ? 'status-' ~ statusClass : '' }}">
+                                <span class="status-badge {{ sMap[sName] is defined ? 'status-' ~ sMap[sName] : '' }}">
                                     <i class="bi bi-circle-fill status-icon"></i>
-                                    {{ statusName }}
+                                    {{ sName }}
                                 </span>
                             {% endif %}
 
                             {% if task.priority %}
-                                {% set priorityName = task.priority.name %}
-                                {% set priorityMap = {
-                                    'Tres faible': 'tres-faible',
-                                    'Faible': 'faible',
-                                    'Modere': 'modere',
-                                    'Eleve': 'eleve',
-                                    'Tres eleve': 'tres-eleve'
+                                {% set pName = task.priority.name %}
+                                {% set pMap = {
+                                    'Très faible': 'tres-faible',
+                                    'Faible':      'faible',
+                                    'Modérée':     'modere',
+                                    'Élevée':      'eleve',
+                                    'Très élevée': 'tres-eleve'
                                 } %}
-                                {% set priorityClass = priorityMap[priorityName]|default('') %}
-                                <span class="priority-badge {{ priorityClass ? 'priority-' ~ priorityClass : '' }}">
+                                <span class="priority-badge {{ pMap[pName] is defined ? 'priority-' ~ pMap[pName] : '' }}">
                                     <i class="bi bi-flag-fill"></i>
-                                    {{ priorityName }}
+                                    {{ pName }}
                                 </span>
                             {% endif %}
 
                             {% if task.users is not empty %}
                                 <span class="meta-pill">
                                     <i class="bi bi-person"></i>
-                                    {% for u in task.users %}{{ u.name }}{% if not loop.last %}, {% endif %}{% endfor %}
+                                    {% for u in task.users %}{{ u.name ?: u.email }}{% if not loop.last %}, {% endif %}{% endfor %}
                                 </span>
                             {% endif %}
                         </div>

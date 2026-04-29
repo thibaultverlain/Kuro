@@ -15,7 +15,7 @@ class TaskRepository extends ServiceEntityRepository
     }
 
     /**
-     * Retourne uniquement les tâches appartenant aux projets dont l'utilisateur est membre.
+     * Retourne uniquement les tâches des projets dont l'utilisateur est membre.
      *
      * @return Task[]
      */
@@ -40,14 +40,13 @@ class TaskRepository extends ServiceEntityRepository
         User $currentUser,
         string $query = '',
         ?string $status = null,
-        ?int $projectId = null,
-        ?int $assignedUserId = null
+        ?int $projectId = null
     ): array {
         $qb = $this->createQueryBuilder('t')
+            ->distinct()
             ->innerJoin('t.project', 'p')
             ->innerJoin('p.users', 'member')
             ->leftJoin('t.status', 's')
-            ->leftJoin('t.users', 'assigned')
             ->andWhere('member = :currentUser')
             ->setParameter('currentUser', $currentUser);
 
@@ -66,14 +65,8 @@ class TaskRepository extends ServiceEntityRepository
                ->setParameter('projectId', $projectId);
         }
 
-        if ($assignedUserId !== null) {
-            $qb->andWhere('assigned.id = :assignedUser')
-               ->setParameter('assignedUser', $assignedUserId);
-        }
-
         return $qb
             ->orderBy('t.createdAt', 'DESC')
-            ->distinct()
             ->getQuery()
             ->getResult();
     }
