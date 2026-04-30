@@ -39,7 +39,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $projects;
 
     #[ORM\ManyToMany(targetEntity: Task::class, inversedBy: 'users')]
-    #[ORM\JoinTable(name: 'user_task')]
     private Collection $tasks;
 
     #[ORM\Column]
