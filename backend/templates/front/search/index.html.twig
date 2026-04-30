@@ -53,7 +53,7 @@
                         <option value="">Tous les projets</option>
                         {% for project in projects %}
                             <option value="{{ project.id }}"
-                                {{ projectFilter == project.id|string ? 'selected' : '' }}>
+                                {{ projectFilter == (project.id ~ '') ? 'selected' : '' }}>
                                 {{ project.name }}
                             </option>
                         {% endfor %}
