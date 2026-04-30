@@ -1,31 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Kuro - Front{% endblock %}</title>
+    <title>{% block title %}Kuro{% endblock %}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <link rel="stylesheet" href="{{ asset('css/accueil.css') }}">
     <link rel="stylesheet" href="{{ asset('css/projet.css') }}">
     <link rel="stylesheet" href="{{ asset('css/task.css') }}">
     <link rel="stylesheet" href="{{ asset('css/user.css') }}">
-
-    <style>
-        .notif-wrapper { position: relative; display: inline-block; }
-        .notif-badge {
-            position: absolute;
-            top: -5px; right: -5px;
-            background-color: #dc3545; color: white;
-            border-radius: 50%; padding: 2px 6px;
-            font-size: 10px; font-weight: bold;
-            display: none; z-index: 10;
-        }
-    </style>
 </head>
 
+{# Dark par défaut — on applique light-mode si l'user l'a choisi #}
 <body>
+
 <div class="page-background">
     <div class="layout">
 
@@ -33,220 +24,214 @@
         <nav class="sidebar">
             <div class="sidebar-header">
                 <div class="logo-box">
-                    <i class="fa-solid fa-briefcase me-2"></i>
-                    Kuro
+                    <i class="fa-solid fa-bolt me-2"></i>Kuro
                 </div>
 
                 <div class="sidebar-actions">
                     <div class="notif-wrapper">
-                        <a href="#" id="notif-open" class="notif-icon">
+                        <a href="#" id="notif-open" class="notif-icon" title="Notifications">
                             <i class="fa-solid fa-bell"></i>
-                            <span class="notif-badge">0</span>
+                            <span class="notif-badge" id="notif-count" style="display:none">0</span>
                         </a>
                     </div>
 
                     <div class="dark-mode-wrapper">
-                        <label class="switch" id="switch">
-                            <input type="checkbox">
+                        <label class="switch" title="Changer le thème">
+                            <input type="checkbox" id="theme-toggle">
                             <span class="slider"></span>
                         </label>
                     </div>
                 </div>
             </div>
 
-            <div class="sidebar-content">
-                <ul class="nav flex-column">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a href="{{ path('front_accueil') }}"
+                       class="nav-link {% if app.request.attributes.get('_route') == 'front_accueil' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-line"></i> Dashboard
+                    </a>
+                </li>
 
-                    <li class="nav-item mb-2">
-                        <a href="{{ path('front_accueil') }}"
-                           class="nav-link {% if app.request.attributes.get('_route') == 'front_accueil' %}active{% endif %}">
-                            <i class="fa-solid fa-chart-line me-2"></i> Dashboard
-                        </a>
-                    </li>
+                <li class="nav-item">
+                    <a href="{{ path('front_project_index') }}"
+                       class="nav-link {% if app.request.attributes.get('_route') starts with 'front_project' %}active{% endif %}">
+                        <i class="fa-solid fa-folder-open"></i> Projets
+                    </a>
+                </li>
 
-                    <li class="nav-item mb-2">
-                        <a class="nav-link d-flex justify-content-between align-items-center"
-                           data-bs-toggle="collapse" href="#menuProjets">
-                            <span><i class="fa-solid fa-folder-open me-2"></i> Projets</span>
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </a>
-                        <div class="collapse" id="menuProjets">
-                            <ul class="nav flex-column sub-menu">
-                                <li class="nav-item">
-                                    <a href="{{ path('front_project_index') }}" class="nav-link">
-                                        <i class="fa-solid fa-list me-2"></i> Gérer les projets
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
+                <li class="nav-item">
+                    <a href="{{ path('front_search') }}"
+                       class="nav-link {% if app.request.attributes.get('_route') == 'front_search' %}active{% endif %}">
+                        <i class="fa-solid fa-magnifying-glass"></i> Recherche
+                    </a>
+                </li>
 
-                    <li class="nav-item mb-2">
-                        <a class="nav-link d-flex justify-content-between align-items-center"
-                           data-bs-toggle="collapse" href="#menuTaches">
-                            <span><i class="fa-solid fa-list-check me-2"></i> Tâches</span>
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </a>
-                        <div class="collapse" id="menuTaches">
-                            <ul class="nav flex-column sub-menu">
-                                <li class="nav-item">
-                                    <a href="{{ path('front_project_index') }}" class="nav-link">
-                                        <i class="fa-solid fa-list me-2"></i> Gérer mes projets
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                <li class="nav-item">
+                    <a href="{{ path('notifications_index') }}"
+                       class="nav-link {% if app.request.attributes.get('_route') starts with 'notifications' %}active{% endif %}">
+                        <i class="fa-solid fa-bell"></i> Notifications
+                    </a>
+                </li>
 
-                    <li class="nav-item mb-2">
-                        <a href="{{ path('front_search') }}"
-                           class="nav-link {% if app.request.attributes.get('_route') == 'front_search' %}active{% endif %}">
-                            <i class="fa-solid fa-magnifying-glass me-2"></i> Recherche
-                        </a>
-                    </li>
+                {% if is_granted('ROLE_ADMIN') %}
+                <li class="nav-item" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle)">
+                    <a href="{{ path('user_index') }}"
+                       class="nav-link {% if app.request.attributes.get('_route') starts with 'user' %}active{% endif %}">
+                        <i class="fa-solid fa-users"></i> Utilisateurs
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ path('admin_project_index') }}"
+                       class="nav-link {% if app.request.attributes.get('_route') starts with 'admin_project' %}active{% endif %}">
+                        <i class="fa-solid fa-folder-gear"></i> Admin projets
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ path('admin_tasks_index') }}"
+                       class="nav-link {% if app.request.attributes.get('_route') starts with 'admin_tasks' %}active{% endif %}">
+                        <i class="fa-solid fa-list-check"></i> Admin tâches
+                    </a>
+                </li>
+                {% endif %}
 
-                    {% if is_granted('ROLE_ADMIN') %}
-                    <li class="nav-item mb-2">
-                        <a class="nav-link d-flex justify-content-between align-items-center"
-                           data-bs-toggle="collapse" href="#menuUsers">
-                            <span><i class="fa-solid fa-users me-2"></i> Utilisateurs</span>
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </a>
-                        <div class="collapse" id="menuUsers">
-                            <ul class="nav flex-column sub-menu">
-                                <li class="nav-item">
-                                    <a href="{{ path('user_index') }}" class="nav-link">
-                                        <i class="fa-solid fa-users-gear me-2"></i> Gérer les utilisateurs
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </li>
-                    {% endif %}
-
-                    <li class="nav-item mb-2">
-                        <a href="{{ path('app_logout') }}" class="nav-link">
-                            <i class="fa-solid fa-right-from-bracket me-2"></i> Déconnexion
-                        </a>
-                    </li>
-
-                </ul>
-            </div>
+                <li class="nav-item" style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border-subtle)">
+                    <a href="{{ path('app_logout') }}" class="nav-link" style="color: var(--text-muted)">
+                        <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
+                    </a>
+                </li>
+            </ul>
         </nav>
         {% endif %}
 
-        <main>
+        <main class="main-content">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} mb-3"
+                         style="border-radius: var(--r-md); border: 1px solid var(--border-subtle); background: var(--bg-card); color: var(--text-primary)">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
             {% block body %}{% endblock %}
         </main>
-
     </div>
 </div>
 
 {% if app.user %}
+{# Overlay notifications #}
 <div id="notif-overlay" class="notif-overlay"></div>
 
 <div id="notif-panel" class="notif-panel">
     <div class="notif-header">
-        <h3>Notifications</h3>
-        <button id="notif-close" class="notif-close">&times;</button>
+        <h3><i class="fa-solid fa-bell me-2"></i>Notifications</h3>
+        <button id="notif-close" class="notif-close" aria-label="Fermer">&times;</button>
     </div>
-
-    <div id="notif-content" class="notif-content"></div>
-
+    <div id="notif-content" class="notif-content">
+        <div class="notif-empty">Chargement...</div>
+    </div>
     <div class="notif-footer">
-        <span class="notif-read-all text-muted">Notifications désactivées</span>
+        <a href="{{ path('notifications_index') }}" class="notif-read-all">
+            Voir toutes les notifications
+        </a>
     </div>
 </div>
 {% endif %}
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    const darkModeToggle = document.querySelector('#switch input');
-    const darkModePref = localStorage.getItem('darkMode');
-
-    if (darkModePref === 'enabled') {
-        document.body.classList.add('dark-mode');
-        if (darkModeToggle) darkModeToggle.checked = true;
+// =========================================================
+// THÈME — Dark par défaut, toggle vers Light
+// =========================================================
+(function() {
+    const pref = localStorage.getItem('kuro-theme');
+    // Si l'user a explicitement choisi le light, on l'applique
+    if (pref === 'light') {
+        document.body.classList.add('light-mode');
     }
+    // Sinon on reste en dark (défaut CSS)
+})();
 
-    if (darkModeToggle) {
-        darkModeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('darkMode', 'disabled');
-            }
-        });
-    }
-</script>
-
-{% if app.user %}
-<script>
 document.addEventListener('DOMContentLoaded', function () {
-    const notifOpen = document.getElementById('notif-open');
-    const notifPanel = document.getElementById('notif-panel');
-    const notifOverlay = document.getElementById('notif-overlay');
-    const notifClose = document.getElementById('notif-close');
-    const notifContent = document.getElementById('notif-content');
+    const toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
 
-    if (!notifOpen || !notifPanel || !notifOverlay || !notifClose || !notifContent) {
-        return;
+    // Cocher si on est en light mode
+    if (document.body.classList.contains('light-mode')) {
+        toggle.checked = true;
     }
 
-    notifOpen.addEventListener('click', function (e) {
-        e.preventDefault();
-        notifPanel.classList.add('open');
-        notifOverlay.classList.add('active');
-
-        fetch('/notification/ajax/unread')
-            .then(response => response.text())
-            .then(html => {
-                notifContent.innerHTML = html;
-            });
-    });
-
-    notifClose.addEventListener('click', function () {
-        notifPanel.classList.remove('open');
-        notifOverlay.classList.remove('active');
-    });
-
-    notifOverlay.addEventListener('click', function () {
-        notifPanel.classList.remove('open');
-        notifOverlay.classList.remove('active');
+    toggle.addEventListener('change', function () {
+        if (this.checked) {
+            document.body.classList.add('light-mode');
+            localStorage.setItem('kuro-theme', 'light');
+        } else {
+            document.body.classList.remove('light-mode');
+            localStorage.setItem('kuro-theme', 'dark');
+        }
     });
 });
 </script>
 
+{% if app.user %}
 <script>
-function checkNotifications() {
-    fetch("/notification/ajax/unread")
-        .then(response => response.text())
-        .then(html => {
-            const panel = document.querySelector(".notif-content");
-            if (panel) panel.innerHTML = html;
+// =========================================================
+// NOTIFICATIONS
+// =========================================================
+document.addEventListener('DOMContentLoaded', function () {
+    const btn     = document.getElementById('notif-open');
+    const panel   = document.getElementById('notif-panel');
+    const overlay = document.getElementById('notif-overlay');
+    const close   = document.getElementById('notif-close');
+    const content = document.getElementById('notif-content');
+    const badge   = document.getElementById('notif-count');
 
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            const count = tempDiv.querySelectorAll('.notif-item').length;
+    if (!btn) return;
 
-            const badge = document.querySelector(".notif-badge");
-            if (badge) {
-                if (count > 0) {
+    function openPanel() {
+        panel.classList.add('open');
+        overlay.classList.add('visible');
+        loadNotifications();
+    }
+
+    function closePanel() {
+        panel.classList.remove('open');
+        overlay.classList.remove('visible');
+    }
+
+    function loadNotifications() {
+        fetch('/notification/ajax/unread', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.text())
+            .then(html => { content.innerHTML = html; })
+            .catch(() => { content.innerHTML = '<div class="notif-empty">Erreur de chargement.</div>'; });
+    }
+
+    function updateBadge() {
+        fetch('/notification/ajax/unread', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.text())
+            .then(html => {
+                const tmp = document.createElement('div');
+                tmp.innerHTML = html;
+                const count = tmp.querySelectorAll('.notif-item').length;
+                if (badge) {
                     badge.textContent = count;
-                    badge.style.display = "inline-block";
-                } else {
-                    badge.style.display = "none";
+                    badge.style.display = count > 0 ? 'flex' : 'none';
                 }
-            }
-        })
-        .catch(err => console.error("Erreur check notifs:", err));
-}
+            })
+            .catch(() => {});
+    }
 
-document.addEventListener("DOMContentLoaded", checkNotifications);
-setInterval(checkNotifications, 5000);
+    btn.addEventListener('click', e => { e.preventDefault(); openPanel(); });
+    close.addEventListener('click', closePanel);
+    overlay.addEventListener('click', closePanel);
+
+    // Chargement initial du badge + polling toutes les 30s
+    updateBadge();
+    setInterval(updateBadge, 30000);
+});
 </script>
 {% endif %}
 
