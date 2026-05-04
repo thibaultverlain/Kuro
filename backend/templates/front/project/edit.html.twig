@@ -3,42 +3,37 @@
 {% block title %}Modifier le projet{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
 
-    <!-- Header avec titre et actions -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <h1 class="h4 m-0 page-title">
-            <i class="fa-solid fa-pen-to-square me-2"></i>
-            Modifier le projet
-        </h1>
-
-        <div class="d-flex gap-2">
-            <a href="{{ path('front_project_index') }}" class="btn btn-sm btn-glass-project">
-                <i class="fa-solid fa-arrow-left"></i> Retour
-            </a>
+<div class="page-header-modern mb-4">
+    <div class="header-content">
+        <div class="header-title-section">
+            <h1 class="modern-title">Modifier le projet</h1>
+            <p class="header-subtitle">{{ project.name }}</p>
         </div>
+        <a href="{{ path('front_project_index') }}" class="btn-reset">
+            <i class="fa-solid fa-arrow-left"></i> Retour
+        </a>
     </div>
+</div>
 
-    <!-- Carte formulaire -->
-    <div class="project-card">
-        <div class="card-header">
-            <h5 class="project-title">
-                <i class="fa-solid fa-file-pen me-2"></i>
-                Informations du projet : {{ project.name }}
-            </h5>
-        </div>
-
-        <div class="project-form mt-3">
+<div class="task-card-form" style="max-width: 680px;">
+    <div class="task-card-header">
+        <h2 class="task-card-title">
+            <i class="fa-solid fa-file-pen"></i>
+            Informations du projet
+        </h2>
+    </div>
+    <div class="task-card-body">
+        <div class="project-form">
             {{ include('front/project/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
         </div>
-
-        <div class="project-actions mt-4 d-flex justify-content-between">
-            <a href="{{ path('front_project_index') }}" class="btn btn-sm btn-glass-project">
-                <i class="fa-solid fa-times"></i> Annuler
-            </a>
-            {{ include('front/project/_delete_form.html.twig') }}
-        </div>
     </div>
-
+    <div class="task-actions-footer">
+        <a href="{{ path('front_project_index') }}" class="btn-reset">
+            <i class="fa-solid fa-xmark"></i> Annuler
+        </a>
+        {{ include('front/project/_delete_form.html.twig') }}
+    </div>
 </div>
+
 {% endblock %}

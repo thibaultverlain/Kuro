@@ -6,141 +6,191 @@
 
 {% if project.users.contains(app.user) %}
 
-<div class="container mt-5">
-
-    <!-- Header avec titre et actions -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <h1 class="h4 m-0 page-title">
-            <i class="fa-solid fa-folder-open me-2"></i>
-            Détails du projet
-        </h1>
-
-        <div class="d-flex gap-2">
-            <a href="{{ path('front_project_index') }}" class="btn btn-sm btn-glass-project">
+{# =========================================================
+   PAGE HEADER
+========================================================= #}
+<div class="page-header-modern mb-4">
+    <div class="header-content">
+        <div class="header-title-section">
+            <h1 class="modern-title">
+                <i class="fa-solid fa-folder-open" style="color:var(--teal);font-size:1.2rem;"></i>
+                {{ project.name }}
+            </h1>
+            <p class="header-subtitle">
+                <i class="fa-regular fa-calendar" style="font-size:11px;"></i>
+                Créé le {{ project.createdAt ? project.createdAt|date('d/m/Y') : '' }}
+                &nbsp;·&nbsp;
+                <i class="fa-solid fa-list-check" style="font-size:11px;"></i>
+                {{ project.tasks|length }} tâche{{ project.tasks|length > 1 ? 's' : '' }}
+                &nbsp;·&nbsp;
+                <i class="fa-solid fa-users" style="font-size:11px;"></i>
+                {{ project.users|length }} membre{{ project.users|length > 1 ? 's' : '' }}
+            </p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="{{ path('front_tasks_new', {'projectId': project.id}) }}" class="btn-glass">
+                <i class="fa-solid fa-plus"></i> Nouvelle tâche
+            </a>
+            <a href="{{ path('front_project_edit', {'id': project.id}) }}" class="btn-glass">
+                <i class="fa-solid fa-pen"></i> Modifier
+            </a>
+            <a href="{{ path('front_project_index') }}" class="btn-reset">
                 <i class="fa-solid fa-arrow-left"></i> Retour
             </a>
-
-            <a href="{{ path('front_project_edit', {'id': project.id}) }}" class="btn btn-sm btn-glass-project">
-                <i class="fa-solid fa-pencil"></i> Modifier
-            </a>
-
             {{ include('front/project/_delete_form.html.twig') }}
         </div>
     </div>
+</div>
 
-    <!-- Carte du projet -->
-    <div class="project-card">
-        <div class="card-header">
-            <h5 class="project-title">{{ project.name }}</h5>
-            <span class="project-date">
-                <i class="fa-regular fa-calendar"></i>
-                {{ project.createdAt ? project.createdAt|date('d/m/Y') : '' }}
-            </span>
-        </div>
+{# =========================================================
+   DESCRIPTION
+========================================================= #}
+{% if project.description %}
+<div class="dashboard-block mb-4">
+    <h2 class="block-title">Description</h2>
+    <p style="color:var(--text-secondary);font-size:13.5px;line-height:1.6;margin:0;">
+        {{ project.description }}
+    </p>
+</div>
+{% endif %}
 
-        <p class="project-desc">
-            <i class="fa-solid fa-align-left me-2"></i>
-            {{ project.description }}
-        </p>
-
-        <div class="project-tasks">
-            <div class="tasks-header">
-                <i class="fa-solid fa-list-check me-2"></i>
-                <strong>Tableau des tâches</strong>
+{# =========================================================
+   MEMBRES
+========================================================= #}
+<div class="dashboard-block mb-4">
+    <h2 class="block-title">Membres</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        {% for member in project.users %}
+            <div style="display:flex;align-items:center;gap:8px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:999px;padding:5px 12px 5px 6px;">
+                <div style="width:26px;height:26px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;color:var(--bg-root);font-size:11px;font-weight:700;">
+                    {{ member.name|slice(0,1)|upper }}
+                </div>
+                <span style="font-size:13px;color:var(--text-primary);font-weight:500;">{{ member.name }}</span>
             </div>
+        {% endfor %}
+    </div>
+</div>
 
-            <div class="kanban-board">
+{# =========================================================
+   KANBAN
+========================================================= #}
+<div class="dashboard-block mb-4">
+    <div class="tasks-header">
+        <i class="fa-solid fa-table-columns"></i>
+        Tableau des tâches
+    </div>
 
-                {% for status in ['En cours', 'Terminee', 'En attente', 'En retard'] %}
-                    {% set statusClass = '' %}
-                    {% set statusKey = status|lower %}
-                    {% if 'cours' in statusKey %}
-                        {% set statusClass = 'status-en-cours' %}
-                    {% elseif 'termine' in statusKey %}
-                        {% set statusClass = 'status-termine' %}
-                    {% elseif 'retard' in statusKey %}
-                        {% set statusClass = 'status-retard' %}
-                    {% elseif 'attente' in statusKey %}
-                        {% set statusClass = 'status-en-attente' %}
-                    {% endif %}
+    <div class="kanban-board">
+        {% for status in ['En cours', 'Terminée', 'À faire', 'En retard'] %}
+            {% set statusKey = status|lower %}
+            {% if 'cours' in statusKey %}
+                {% set statusClass = 'status-en-cours' %}
+            {% elseif 'termin' in statusKey %}
+                {% set statusClass = 'status-termine' %}
+            {% elseif 'retard' in statusKey %}
+                {% set statusClass = 'status-retard' %}
+            {% else %}
+                {% set statusClass = 'status-en-attente' %}
+            {% endif %}
 
-                    <div class="kanban-column" data-status="{{ status }}">
-                        <div class="kanban-title {{ statusClass }}">
-                            {{ status }}
-                        </div>
+            <div class="kanban-column" data-status="{{ status }}">
+                <div class="kanban-title {{ statusClass }}">{{ status }}</div>
 
-                        <div class="tasks-list">
-                            {% set tasks = [] %}
-                            {% for task in project.tasks %}
-                                {% if task.status and task.status.name == status %}
-                                    {% set tasks = tasks|merge([task]) %}
-                                {% endif %}
-                            {% endfor %}
+                <div class="tasks-list">
+                    {% set filtered = [] %}
+                    {% for task in project.tasks %}
+                        {% if task.status and task.status.name == status %}
+                            {% set filtered = filtered|merge([task]) %}
+                        {% endif %}
+                    {% endfor %}
 
-                            {% if tasks is not empty %}
-                                {% for task in tasks %}
-                                    <div class="task-card" data-task-id="{{ task.id }}">
-                                        <div class="task-header drag-handle" title="Glisser pour déplacer">
-                                            <a href="{{ path('front_tasks_show', {'id': task.id}) }}" class="task-title-link">
-                                                <strong class="task-title">{{ task.title }}</strong>
-                                            </a>
-                                            {% if task.dueDate %}
-                                                <span class="task-date">
-                                                    <i class="fa-regular fa-clock"></i>
-                                                    {{ task.dueDate|date('d/m/Y') }}
-                                                </span>
-                                            {% endif %}
-                                        </div>
-
-                                        {% if task.priority %}
-                                            {% set priorityName = task.priority.name %}
-                                            {% set priorityMap = {
-                                                'Tres faible': 'tres-faible',
-                                                'Faible': 'faible',
-                                                'Modere': 'modere',
-                                                'Eleve': 'eleve',
-                                                'Tres eleve': 'tres-eleve'
-                                            } %}
-                                            {% set priorityClass = priorityMap[priorityName]|default('') %}
-                                            <span class="priority-badge {{ priorityClass ? 'priority-' ~ priorityClass : '' }}">
-                                                {{ priorityName }}
+                    {% if filtered is not empty %}
+                        {% for task in filtered %}
+                            <div class="task-card" data-task-id="{{ task.id }}">
+                                <div class="task-header drag-handle" title="Glisser pour déplacer">
+                                    <div class="task-title-section">
+                                        <a href="{{ path('front_tasks_show', {'id': task.id}) }}" class="task-title-link">
+                                            <span class="task-title">{{ task.title }}</span>
+                                        </a>
+                                        {% if task.description %}
+                                            <span class="task-description">
+                                                {{ task.description|slice(0, 60) }}{% if task.description|length > 60 %}…{% endif %}
                                             </span>
                                         {% endif %}
                                     </div>
-                                {% endfor %}
-                            {% else %}
-                                <p class="text-muted empty-state-text">
-                                    <i class="fa-solid fa-inbox"></i>
-                                    Aucune tâche
-                                </p>
-                            {% endif %}
+                                    {% if task.dueDate %}
+                                        <span class="task-date">
+                                            <i class="fa-regular fa-calendar"></i>
+                                            {{ task.dueDate|date('d/m') }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                {% if task.priority %}
+                                    {% set priorityMap = {
+                                        'Tres faible': 'tres-faible',
+                                        'Faible': 'faible',
+                                        'Modere': 'modere',
+                                        'Eleve': 'eleve',
+                                        'Tres eleve': 'tres-eleve'
+                                    } %}
+                                    {% set priorityClass = priorityMap[task.priority.name]|default('') %}
+                                    <span class="priority-badge priority-{{ priorityClass }}">
+                                        <i class="fa-solid fa-flag"></i>
+                                        {{ task.priority.name }}
+                                    </span>
+                                {% endif %}
+
+                                {% if task.users is not empty %}
+                                    <div style="display:flex;margin-top:8px;">
+                                        {% for assignee in task.users|slice(0,3) %}
+                                            <div style="width:20px;height:20px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;color:var(--bg-root);font-size:9px;font-weight:700;margin-right:-4px;border:2px solid var(--bg-elevated);">
+                                                {{ assignee.name|slice(0,1)|upper }}
+                                            </div>
+                                        {% endfor %}
+                                        {% if task.users|length > 3 %}
+                                            <div style="width:20px;height:20px;border-radius:50%;background:var(--bg-hover);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:9px;font-weight:700;margin-right:-4px;border:2px solid var(--bg-elevated);">
+                                                +{{ task.users|length - 3 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state-text">
+                            <i class="fa-solid fa-inbox"></i>
+                            Aucune tâche
                         </div>
-                    </div>
-                {% endfor %}
-
+                    {% endif %}
+                </div>
             </div>
-        </div>
+        {% endfor %}
     </div>
-
 </div>
 
-<!-- CSRF token pour le Kanban -->
+{% else %}
+<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--r-md);padding:16px;color:var(--red);font-size:13px;">
+    <i class="fa-solid fa-circle-exclamation me-2"></i>
+    Accès refusé.
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
 <script>
 const csrfToken = "{{ csrf_token('task_status') }}";
-</script>
 
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<script>
 document.addEventListener('DOMContentLoaded', () => {
-    const columns = document.querySelectorAll('.tasks-list');
-
-    columns.forEach(column => {
+    document.querySelectorAll('.tasks-list').forEach(column => {
         Sortable.create(column, {
             group: 'kanban',
             animation: 150,
             handle: '.drag-handle',
             draggable: '.task-card',
             ghostClass: 'drag-ghost',
+
             onAdd: function (evt) {
                 const item = evt.item;
                 const taskId = item.dataset.taskId;
@@ -152,19 +202,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({
-                        status: newStatus,
-                        _token: csrfToken
-                    })
+                    body: JSON.stringify({ status: newStatus, _token: csrfToken })
                 })
                 .then(res => {
                     if (!res.ok) throw new Error('Erreur serveur');
                     return res.json();
                 })
-                .then(data => {
-                    window.location.reload();
-                })
-                .catch(err => {
+                .then(() => { window.location.reload(); })
+                .catch(() => {
                     evt.from.insertBefore(item, evt.from.children[evt.oldIndex] || null);
                     alert('Erreur lors de la mise à jour');
                 });
@@ -173,11 +218,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
-
-{% else %}
-<div class="alert alert-danger mt-5">
-    Accès refusé.
-</div>
-{% endif %}
-
 {% endblock %}

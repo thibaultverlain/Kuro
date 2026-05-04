@@ -1,12 +1,11 @@
 {{ form_start(form, {'attr': {'class': 'project-form needs-validation'}}) }}
-    <div class="mb-3">
-        {{ form_widget(form, {
-            'attr': {
-                'class': 'form-input'
-            }
-        }) }}
+
+    {{ form_widget(form) }}
+
+    <div style="margin-top: 8px;">
+        <button type="submit" class="btn-glass">
+            <i class="fa-solid fa-check"></i> {{ button_label|default('Enregistrer') }}
+        </button>
     </div>
-    <button class="btn btn-sm btn-glass-project">
-        <i class="bi bi-check-circle"></i> {{ button_label|default('Enregistrer') }}
-    </button>
+
 {{ form_end(form) }}

@@ -3,144 +3,159 @@
 {% block title %}Liste des projets{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
 
-    <div class="d-flex align-items-center justify-content-between mb-4 gap-3">
-
-        <h1 class="h4 m-0 page-title">Mes projets en cours</h1>
-
-        <a href="{{ path('front_project_new') }}" class="btn btn-primary btn-glass-project flex-shrink-0">
-            <i class="bi bi-plus-circle"></i> Nouveau projet
+{# =========================================================
+   PAGE HEADER
+========================================================= #}
+<div class="page-header-modern mb-4">
+    <div class="header-content">
+        <div class="header-title-section">
+            <h1 class="modern-title">Mes projets</h1>
+            <p class="header-subtitle">{{ projects|length }} projet{{ projects|length > 1 ? 's' : '' }} au total</p>
+        </div>
+        <a href="{{ path('front_project_new') }}" class="btn-glass">
+            <i class="fa-solid fa-plus"></i> Nouveau projet
         </a>
     </div>
-
-    <div class="projects-grid">
-        {% for project in projects %}
-
-            {% if project.users.contains(app.user) %}
-            <div class="project-card">
-                <div class="card-header">
-                    <h5 class="project-title">{{ project.name }}</h5>
-                    <span class="project-date">
-                        {{ project.createdAt ? project.createdAt|date('d/m/Y') : '' }}
-                    </span>
-                </div>
-
-                <p class="project-desc">{{ project.description }}</p>
-
-                <div class="project-tasks">
-                    <strong>Tâches :</strong>
-
-                    {% if project.tasks is not empty %}
-                        <div class="kanban-board">
-
-                            {% for status in ['En cours', 'Terminee', 'En attente', 'En retard'] %}
-                                {% set statusClass = '' %}
-                                {% set statusKey = status|lower %}
-                                {% if 'cours' in statusKey %}
-                                    {% set statusClass = 'status-en-cours' %}
-                                {% elseif 'termine' in statusKey %}
-                                    {% set statusClass = 'status-termine' %}
-                                {% elseif 'retard' in statusKey %}
-                                    {% set statusClass = 'status-retard' %}
-                                {% elseif 'attente' in statusKey %}
-                                    {% set statusClass = 'status-en-attente' %}
-                                {% endif %}
-
-                                <div class="kanban-column"
-                                     data-status="{{ status }}"
-                                     data-project-id="{{ project.id }}">
-
-                                    <div class="kanban-title {{ statusClass }}">{{ status }}</div>
-
-                                    <div class="tasks-list">
-                                        {% set tasks = [] %}
-                                        {% for task in project.tasks %}
-                                            {% if task.status and task.status.name == status %}
-                                                {% set tasks = tasks|merge([task]) %}
-                                            {% endif %}
-                                        {% endfor %}
-
-                                        {% if tasks is not empty %}
-                                            {% for task in tasks %}
-                                                <div class="task-card"
-                                                     data-task-id="{{ task.id }}"
-                                                     data-project-id="{{ project.id }}">
-
-                                                    <div class="task-header drag-handle" title="Glisser pour déplacer">
-                                                        <a href="{{ path('front_tasks_show', {'id': task.id}) }}" class="task-title-link">
-                                                            <strong class="task-title">{{ task.title }}</strong>
-                                                        </a>
-                                                        {% if task.dueDate %}
-                                                            <span class="task-date">{{ task.dueDate|date('d/m/Y') }}</span>
-                                                        {% endif %}
-                                                    </div>
-
-                                                    {% if task.priority %}
-                                                        {% set priorityName = task.priority.name %}
-                                                        {% set priorityMap = {
-                                                            'Tres faible': 'tres-faible',
-                                                            'Faible': 'faible',
-                                                            'Modere': 'modere',
-                                                            'Eleve': 'eleve',
-                                                            'Tres eleve': 'tres-eleve'
-                                                        } %}
-                                                        {% set priorityClass = priorityMap[priorityName]|default('') %}
-                                                        <span class="priority-badge {{ priorityClass ? 'priority-' ~ priorityClass : '' }}">
-                                                            {{ priorityName }}
-                                                        </span>
-                                                    {% endif %}
-                                                </div>
-                                            {% endfor %}
-                                        {% else %}
-                                            <p class="text-muted">Aucune tâche</p>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <span class="text-muted">Aucune tâche</span>
-                    {% endif %}
-                </div>
-
-                <div class="project-actions mt-3">
-
-                    <a href="{{ path('front_project_show', {'id': project.id}) }}" class="btn btn-sm btn-outline-light me-2">
-                        <i class="bi bi-eye"></i> Voir
-                    </a>
-
-                    {% if project.users.contains(app.user) %}
-                        <a href="{{ path('front_tasks_new', {'projectId': project.id}) }}"
-                           class="btn btn-sm btn-outline-primary me-2">
-                            <i class="bi bi-plus-circle"></i> Nouvelle tâche
-                        </a>
-
-                        <a href="{{ path('front_project_edit', {'id': project.id}) }}" class="btn btn-sm btn-outline-info me-2">
-                            <i class="bi bi-pencil"></i> Modifier
-                        </a>
-
-                        {{ include('front/project/_delete_form.html.twig') }}
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-
-        {% else %}
-            <p class="text-muted text-center">Aucun projet trouvé</p>
-        {% endfor %}
-    </div>
-
 </div>
 
-<!-- CSRF token pour le Kanban -->
+{# =========================================================
+   LISTE DES PROJETS
+========================================================= #}
+<div class="projects-grid">
+    {% for project in projects %}
+        {% if project.users.contains(app.user) %}
+        <div class="project-card">
+
+            <div class="card-header">
+                <h5 class="project-title">{{ project.name }}</h5>
+                <span class="project-date">
+                    <i class="fa-regular fa-calendar" style="font-size:10px;"></i>
+                    {{ project.createdAt ? project.createdAt|date('d/m/Y') : '' }}
+                </span>
+            </div>
+
+            {% if project.description %}
+                <p class="project-desc">
+                    {{ project.description|slice(0, 100) }}{% if project.description|length > 100 %}…{% endif %}
+                </p>
+            {% endif %}
+
+            {# Mini stats #}
+            <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+                <span class="meta-pill">
+                    <i class="fa-solid fa-list-check" style="font-size:10px;"></i>
+                    {{ project.tasks|length }} tâche{{ project.tasks|length > 1 ? 's' : '' }}
+                </span>
+                <span class="meta-pill">
+                    <i class="fa-solid fa-users" style="font-size:10px;"></i>
+                    {{ project.users|length }} membre{{ project.users|length > 1 ? 's' : '' }}
+                </span>
+            </div>
+
+            {# Kanban mini #}
+            {% if project.tasks is not empty %}
+            <div class="kanban-board">
+                {% for status in ['En cours', 'Terminée', 'À faire', 'En retard'] %}
+                    {% set statusKey = status|lower %}
+                    {% if 'cours' in statusKey %}
+                        {% set statusClass = 'status-en-cours' %}
+                    {% elseif 'termin' in statusKey %}
+                        {% set statusClass = 'status-termine' %}
+                    {% elseif 'retard' in statusKey %}
+                        {% set statusClass = 'status-retard' %}
+                    {% else %}
+                        {% set statusClass = 'status-en-attente' %}
+                    {% endif %}
+
+                    <div class="kanban-column" data-status="{{ status }}" data-project-id="{{ project.id }}">
+                        <div class="kanban-title {{ statusClass }}">{{ status }}</div>
+                        <div class="tasks-list">
+                            {% set filtered = [] %}
+                            {% for task in project.tasks %}
+                                {% if task.status and task.status.name == status %}
+                                    {% set filtered = filtered|merge([task]) %}
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if filtered is not empty %}
+                                {% for task in filtered %}
+                                    <div class="task-card" data-task-id="{{ task.id }}" data-project-id="{{ project.id }}">
+                                        <div class="task-header drag-handle">
+                                            <a href="{{ path('front_tasks_show', {'id': task.id}) }}" class="task-title-link">
+                                                <span class="task-title">{{ task.title }}</span>
+                                            </a>
+                                            {% if task.dueDate %}
+                                                <span class="task-date">
+                                                    <i class="fa-regular fa-calendar"></i>
+                                                    {{ task.dueDate|date('d/m') }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+
+                                        {% if task.priority %}
+                                            {% set priorityMap = {
+                                                'Tres faible': 'tres-faible',
+                                                'Faible': 'faible',
+                                                'Modere': 'modere',
+                                                'Eleve': 'eleve',
+                                                'Tres eleve': 'tres-eleve'
+                                            } %}
+                                            {% set priorityClass = priorityMap[task.priority.name]|default('') %}
+                                            <span class="priority-badge priority-{{ priorityClass }}">
+                                                <i class="fa-solid fa-flag"></i>
+                                                {{ task.priority.name }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="empty-state-text" style="padding:1rem;">
+                                    <i class="fa-regular fa-circle-dot"></i>
+                                    Vide
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% else %}
+                <div class="empty-state-text" style="padding:0.5rem 0 1rem;">
+                    <i class="fa-solid fa-inbox"></i>
+                    Aucune tâche pour ce projet
+                </div>
+            {% endif %}
+
+            {# Actions #}
+            <div class="project-actions" style="padding-top:12px;border-top:1px solid var(--border-subtle);">
+                <a href="{{ path('front_project_show', {'id': project.id}) }}" class="btn-sm">
+                    <i class="fa-solid fa-eye"></i> Voir
+                </a>
+                <a href="{{ path('front_tasks_new', {'projectId': project.id}) }}" class="btn-sm">
+                    <i class="fa-solid fa-plus"></i> Tâche
+                </a>
+                <a href="{{ path('front_project_edit', {'id': project.id}) }}" class="btn-sm">
+                    <i class="fa-solid fa-pen"></i> Modifier
+                </a>
+                {{ include('front/project/_delete_form.html.twig') }}
+            </div>
+
+        </div>
+        {% endif %}
+    {% else %}
+        <div style="text-align:center;padding:3rem;color:var(--text-muted);font-size:13px;">
+            <i class="fa-solid fa-folder-open" style="font-size:2rem;opacity:0.2;display:block;margin-bottom:12px;"></i>
+            Aucun projet trouvé. <a href="{{ path('front_project_new') }}" style="color:var(--teal);">Créer un projet</a>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
 <script>
 const csrfToken = "{{ csrf_token('task_status') }}";
-</script>
 
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-
-<script>
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.tasks-list').forEach(list => {
         Sortable.create(list, {
@@ -152,7 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             onAdd: function (evt) {
                 const item = evt.item;
-
                 const taskProjectId = item.dataset.projectId;
                 const targetProjectId = evt.to.closest('.kanban-column').dataset.projectId;
 
@@ -171,19 +185,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({
-                        status: newStatus,
-                        _token: csrfToken
-                    })
+                    body: JSON.stringify({ status: newStatus, _token: csrfToken })
                 })
                 .then(res => {
                     if (!res.ok) throw new Error('HTTP ' + res.status);
                     return res.json();
                 })
-                .then(data => {
-                    window.location.reload();
-                })
-                .catch(err => {
+                .then(() => { window.location.reload(); })
+                .catch(() => {
                     evt.from.insertBefore(item, evt.from.children[evt.oldIndex] || null);
                     alert('Erreur lors de la mise à jour');
                 });
@@ -192,5 +201,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
-
 {% endblock %}

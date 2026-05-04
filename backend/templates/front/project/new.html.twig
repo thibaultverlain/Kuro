@@ -3,23 +3,31 @@
 {% block title %}Nouveau projet{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
 
-    <div class="project-card">
-        <div class="card-header">
-            <h5 class="project-title">Créer un nouveau projet</h5>
+<div class="page-header-modern mb-4">
+    <div class="header-content">
+        <div class="header-title-section">
+            <h1 class="modern-title">Nouveau projet</h1>
+            <p class="header-subtitle">Remplissez les informations pour créer votre projet</p>
         </div>
+        <a href="{{ path('front_project_index') }}" class="btn-glass">
+            <i class="fa-solid fa-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
 
-        <div class="project-form mt-3">
+<div class="task-card-form" style="max-width: 680px;">
+    <div class="task-card-header">
+        <h2 class="task-card-title">
+            <i class="fa-solid fa-folder-plus"></i>
+            Créer un projet
+        </h2>
+    </div>
+    <div class="task-card-body">
+        <div class="project-form">
             {{ include('front/project/_form.html.twig') }}
         </div>
-
-        <div class="project-actions mt-4 d-flex justify-content-between">
-            <a href="{{ path('front_project_index') }}" class="btn btn-sm btn-glass-project">
-                <i class="bi bi-arrow-left"></i> Retour à la liste
-            </a>
-        </div>
     </div>
-
 </div>
+
 {% endblock %}
