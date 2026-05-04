@@ -1,36 +1,31 @@
 {% if task is defined %}
     {% if task.project.users.contains(app.user) %}
-        {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
-            <div class="mb-3">
-                {{ form_widget(form, {
-                    'attr': {
-                        'class': 'form-control'
-                    }
-                }) }}
+        {{ form_start(form, {'attr': {'class': 'task-form needs-validation'}}) }}
+            {{ form_widget(form) }}
+            <div style="margin-top: 8px;">
+                <button type="submit" class="btn-glass">
+                    <i class="fa-solid fa-check"></i> {{ button_label|default('Enregistrer') }}
+                </button>
             </div>
-            <button type="submit" class="btn-glass">
-                <i class="bi bi-check-circle"></i> {{ button_label|default('Enregistrer') }}
-            </button>
         {{ form_end(form) }}
     {% else %}
-        <div class="alert alert-danger mt-3">Accès refusé.</div>
+        <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--r-md);padding:12px 16px;color:var(--red);font-size:13px;">
+            <i class="fa-solid fa-circle-exclamation me-2"></i> Accès refusé.
+        </div>
     {% endif %}
 {% else %}
-    {# Cas création : on vérifie l'accès via project #}
     {% if project.users.contains(app.user) %}
-        {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
-            <div class="mb-3">
-                {{ form_widget(form, {
-                    'attr': {
-                        'class': 'form-control'
-                    }
-                }) }}
+        {{ form_start(form, {'attr': {'class': 'task-form needs-validation'}}) }}
+            {{ form_widget(form) }}
+            <div style="margin-top: 8px;">
+                <button type="submit" class="btn-glass">
+                    <i class="fa-solid fa-check"></i> {{ button_label|default('Enregistrer') }}
+                </button>
             </div>
-            <button type="submit" class="btn-glass">
-                <i class="bi bi-check-circle"></i> {{ button_label|default('Enregistrer') }}
-            </button>
         {{ form_end(form) }}
     {% else %}
-        <div class="alert alert-danger mt-3">Accès refusé.</div>
+        <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--r-md);padding:12px 16px;color:var(--red);font-size:13px;">
+            <i class="fa-solid fa-circle-exclamation me-2"></i> Accès refusé.
+        </div>
     {% endif %}
 {% endif %}

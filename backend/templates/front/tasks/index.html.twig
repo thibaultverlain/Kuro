@@ -3,222 +3,223 @@
 {% block title %}Liste des tâches{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
 
-    <div class="page-header-modern">
-        <div class="header-content">
-            <div class="header-title-section">
-                <h1 class="modern-title">Liste des tâches</h1>
-                <p class="header-subtitle">Gérez vos projets efficacement</p>
-            </div>
+{# =========================================================
+   BUILD PROJECTS LIST
+========================================================= #}
+{% set canCreate = false %}
+{% set projects = [] %}
+{% for t in tasks %}
+    {% if t.project and t.project.users.contains(app.user) %}
+        {% set canCreate = true %}
+        {% if t.project not in projects %}
+            {% set projects = projects|merge([t.project]) %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
 
-            {# 🔒 Vérification stricte : l'utilisateur doit appartenir au projet #}
-            {% set canCreate = false %}
-            {% for t in tasks %}
-                {% if t.project and t.project.users.contains(app.user) %}
-                    {% set canCreate = true %}
-                {% endif %}
-            {% endfor %}
-
-            {# 🔒 Construction sécurisée de la liste des projets #}
-            {% set projects = [] %}
-            {% for t in tasks %}
-                {% if t.project 
-                    and t.project.users.contains(app.user)
-                    and t.project not in projects %}
-                    {% set projects = projects|merge([t.project]) %}
-                {% endif %}
-            {% endfor %}
-
-            {% if canCreate and projects|length > 0 %}
-                <a href="{{ path('front_tasks_new', { projectId: projects[0].id }) }}" class="btn-glass">
-                    <i class="bi bi-plus-circle"></i> Nouvelle tâche
-                </a>
-            {% endif %}
+{# =========================================================
+   PAGE HEADER
+========================================================= #}
+<div class="page-header-modern mb-4">
+    <div class="header-content">
+        <div class="header-title-section">
+            <h1 class="modern-title">Mes tâches</h1>
+            <p class="header-subtitle">{{ tasks|length }} tâche{{ tasks|length > 1 ? 's' : '' }} au total</p>
         </div>
-    </div>
-
-    {# ----------------------------- #
-       FILTRES
-       ----------------------------- #}
-    <div class="filters-wrapper">
-        <div class="filters-header">
-            <i class="bi bi-funnel"></i>
-            <span>Filtrer les tâches</span>
-        </div>
-        
-        <div class="filters-grid">
-            <div class="filter-item">
-                <label class="filter-label">
-                    <i class="bi bi-search"></i> Recherche
-                </label>
-                <input id="search" class="form-control" placeholder="Rechercher une tâche...">
-            </div>
-
-            <div class="filter-item">
-                <label class="filter-label">
-                    <i class="bi bi-check-circle"></i> Statut
-                </label>
-                <select id="status" class="form-select">
-                    <option value="">Tous les statuts</option>
-                    <option value="En cours">En cours</option>
-                    <option value="Terminee">Terminée</option>
-                    <option value="En retard">En retard</option>
-                    <option value="En attente">En attente</option>
-                </select>
-            </div>
-
-            <div class="filter-item">
-                <label class="filter-label">
-                    <i class="bi bi-exclamation-triangle"></i> Priorité
-                </label>
-                <select id="priority" class="form-select">
-                    <option value="">Toutes les priorités</option>
-                    <option value="Tres faible">Très faible</option>
-                    <option value="Faible">Faible</option>
-                    <option value="Modere">Modérée</option>
-                    <option value="Eleve">Élevée</option>
-                    <option value="Tres eleve">Très élevée</option>
-                </select>
-            </div>
-
-            <div class="filter-item">
-                <label class="filter-label">
-                    <i class="bi bi-folder"></i> Projet
-                </label>
-                <select id="project" class="form-select">
-                    <option value="">Tous les projets</option>
-                    {% for project in projects %}
-                        {% if project.users.contains(app.user) %}
-                            <option value="{{ project.name }}">{{ project.name }}</option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-        <div class="filters-actions">
-            <button id="reset-filters" class="btn-reset">
-                <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser les filtres
-            </button>
-        </div>
-    </div>
-
-    {# ----------------------------- #
-       KANBAN
-       ----------------------------- #}
-    <div class="kanban-board-t">
-        {% for project in projects %}
-            {% if project.users.contains(app.user) %}
-            <div class="kanban-column-t">
-                <div class="kanban-title-t">
-                    <i class="bi bi-folder2-open"></i>
-                    {{ project.name }}
-                </div>
-
-                {% set tasksForProject = [] %}
-                {% for t in tasks %}
-                    {% if t.project 
-                        and t.project.id == project.id
-                        and t.project.users.contains(app.user) %}
-                        {% set tasksForProject = tasksForProject|merge([t]) %}
-                    {% endif %}
-                {% endfor %}
-
-                {% if tasksForProject is not empty %}
-                    {% for t in tasksForProject %}
-                        <div class="task-card">
-
-                            <div class="task-header">
-                                <div class="task-title-section">
-                                    <strong class="task-title">{{ t.title }}</strong>
-                                    {% if t.description %}
-                                        <small class="task-description">{{ t.description }}</small>
-                                    {% endif %}
-                                </div>
-                                {% if t.dueDate %}
-                                    <span class="task-date">
-                                        <i class="bi bi-calendar-event"></i>
-                                        {{ t.dueDate|date('d F Y') }}
-                                    </span>
-                                {% endif %}
-                            </div>
-
-                            <div class="task-meta">
-
-                                {% if t.priority %}
-                                    {% set priorityName = t.priority.name %}
-                                    {% set priorityMap = {
-                                        'Tres faible': 'tres-faible',
-                                        'Faible': 'faible',
-                                        'Modere': 'modere',
-                                        'Eleve': 'eleve',
-                                        'Tres eleve': 'tres-eleve'
-                                    } %}
-                                    {% set priorityClass = priorityMap[priorityName]|default('') %}
-                                    <span class="priority-badge {{ priorityClass ? 'priority-' ~ priorityClass : '' }}">
-                                        <i class="bi bi-flag-fill"></i>
-                                        {{ priorityName }}
-                                    </span>
-                                {% endif %}
-
-                                {% if t.status %}
-                                    {% set statusName = t.status.name %}
-                                    {% set statusMap = {
-                                        'En cours': 'en-cours',
-                                        'Terminee': 'termine',
-                                        'En retard': 'retard',
-                                        'En attente': 'en-attente'
-                                    } %}
-                                    {% set statusClass = statusMap[statusName]|default('') %}
-                                    <span class="status-badge {{ statusClass ? 'status-' ~ statusClass : '' }}">
-                                        <i class="bi bi-circle-fill status-icon"></i>
-                                        {{ statusName }}
-                                    </span>
-                                {% endif %}
-
-                                {% if t.createdAt %}
-                                    <span class="meta-pill">
-                                        <i class="bi bi-plus-circle"></i>
-                                        {{ t.createdAt|date('d F Y') }}
-                                    </span>
-                                {% endif %}
-                                {% if t.lastChangedAt %}
-                                    <span class="meta-pill">
-                                        <i class="bi bi-pencil"></i>
-                                        {{ t.lastChangedAt|date('d F Y') }}
-                                    </span>
-                                {% endif %}
-                            </div>
-
-                            <div class="task-actions">
-                                <a href="{{ path('front_tasks_show', {'id': t.id}) }}" class="btn-glass btn-small">
-                                    <i class="bi bi-eye"></i> Voir
-                                </a>
-
-                                {% if t.project.users.contains(app.user) %}
-                                    <a href="{{ path('front_tasks_edit', {'id': t.id}) }}" class="btn-glass btn-small">
-                                        <i class="bi bi-pencil"></i> Modifier
-                                    </a>
-
-                                    {{ include('front/tasks/_delete_form.html.twig', { task: t, btn_class: 'btn-glass-red btn-small' }) }}
-                                {% endif %}
-                            </div>
-
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-            {% endif %}
-        {% endfor %}
+        {% if canCreate and projects|length > 0 %}
+            <a href="{{ path('front_tasks_new', { projectId: projects[0].id }) }}" class="btn-glass">
+                <i class="fa-solid fa-plus"></i> Nouvelle tâche
+            </a>
+        {% endif %}
     </div>
 </div>
 
+{# =========================================================
+   FILTRES
+========================================================= #}
+<div class="filters-wrapper mb-4">
+    <div class="filters-header">
+        <i class="fa-solid fa-sliders"></i>
+        <span>Filtrer les tâches</span>
+    </div>
+
+    <div class="filters-grid">
+        <div class="filter-item">
+            <label class="filter-label">
+                <i class="fa-solid fa-magnifying-glass"></i> Recherche
+            </label>
+            <input id="search" class="form-control" placeholder="Rechercher une tâche...">
+        </div>
+
+        <div class="filter-item">
+            <label class="filter-label">
+                <i class="fa-solid fa-circle-half-stroke"></i> Statut
+            </label>
+            <select id="status" class="form-select">
+                <option value="">Tous les statuts</option>
+                <option value="En cours">En cours</option>
+                <option value="Terminée">Terminée</option>
+                <option value="En retard">En retard</option>
+                <option value="À faire">À faire</option>
+            </select>
+        </div>
+
+        <div class="filter-item">
+            <label class="filter-label">
+                <i class="fa-solid fa-flag"></i> Priorité
+            </label>
+            <select id="priority" class="form-select">
+                <option value="">Toutes les priorités</option>
+                <option value="Tres faible">Très faible</option>
+                <option value="Faible">Faible</option>
+                <option value="Modere">Modérée</option>
+                <option value="Eleve">Élevée</option>
+                <option value="Tres eleve">Très élevée</option>
+            </select>
+        </div>
+
+        <div class="filter-item">
+            <label class="filter-label">
+                <i class="fa-solid fa-folder"></i> Projet
+            </label>
+            <select id="project" class="form-select">
+                <option value="">Tous les projets</option>
+                {% for project in projects %}
+                    <option value="{{ project.name }}">{{ project.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="filters-actions">
+        <button id="reset-filters" class="btn-reset">
+            <i class="fa-solid fa-rotate-left"></i> Réinitialiser
+        </button>
+    </div>
+</div>
+
+{# =========================================================
+   KANBAN PAR PROJET
+========================================================= #}
+<div class="kanban-board-t">
+    {% for project in projects %}
+        <div class="kanban-column-t">
+            <div class="kanban-title-t">
+                <i class="fa-solid fa-folder-open"></i>
+                {{ project.name }}
+            </div>
+
+            {% set tasksForProject = [] %}
+            {% for t in tasks %}
+                {% if t.project and t.project.id == project.id and t.project.users.contains(app.user) %}
+                    {% set tasksForProject = tasksForProject|merge([t]) %}
+                {% endif %}
+            {% endfor %}
+
+            {% if tasksForProject is not empty %}
+                {% for t in tasksForProject %}
+                    <div class="task-card">
+
+                        <div class="task-header">
+                            <div class="task-title-section">
+                                <span class="task-title">{{ t.title }}</span>
+                                {% if t.description %}
+                                    <span class="task-description">
+                                        {{ t.description|slice(0, 80) }}{% if t.description|length > 80 %}…{% endif %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            {% if t.dueDate %}
+                                <span class="task-date">
+                                    <i class="fa-regular fa-calendar"></i>
+                                    {{ t.dueDate|date('d/m/Y') }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="task-meta">
+                            {% if t.priority %}
+                                {% set priorityMap = {
+                                    'Tres faible': 'tres-faible',
+                                    'Faible': 'faible',
+                                    'Modere': 'modere',
+                                    'Eleve': 'eleve',
+                                    'Tres eleve': 'tres-eleve'
+                                } %}
+                                {% set priorityClass = priorityMap[t.priority.name]|default('') %}
+                                <span class="priority-badge priority-{{ priorityClass }}">
+                                    <i class="fa-solid fa-flag"></i>
+                                    {{ t.priority.name }}
+                                </span>
+                            {% endif %}
+
+                            {% if t.status %}
+                                {% set statusMap = {
+                                    'En cours':  'en-cours',
+                                    'Terminée':  'termine',
+                                    'En retard': 'retard',
+                                    'À faire':   'en-attente'
+                                } %}
+                                {% set statusClass = statusMap[t.status.name]|default('') %}
+                                <span class="status-badge status-{{ statusClass }}">
+                                    <i class="fa-solid fa-circle status-icon"></i>
+                                    {{ t.status.name }}
+                                </span>
+                            {% endif %}
+
+                            {% if t.createdAt %}
+                                <span class="meta-pill">
+                                    <i class="fa-solid fa-plus"></i>
+                                    {{ t.createdAt|date('d/m/Y') }}
+                                </span>
+                            {% endif %}
+
+                            {% if t.lastChangedAt %}
+                                <span class="meta-pill">
+                                    <i class="fa-solid fa-pen"></i>
+                                    {{ t.lastChangedAt|date('d/m/Y') }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="task-actions">
+                            <a href="{{ path('front_tasks_show', {'id': t.id}) }}" class="btn-glass btn-small">
+                                <i class="fa-solid fa-eye"></i> Voir
+                            </a>
+                            {% if t.project.users.contains(app.user) %}
+                                <a href="{{ path('front_tasks_edit', {'id': t.id}) }}" class="btn-glass btn-small">
+                                    <i class="fa-solid fa-pen"></i> Modifier
+                                </a>
+                                {{ include('front/tasks/_delete_form.html.twig', { task: t, btn_class: 'btn-glass-red btn-small' }) }}
+                            {% endif %}
+                        </div>
+
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state-text">
+                    <i class="fa-solid fa-inbox"></i>
+                    Aucune tâche
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div style="text-align:center;padding:3rem;color:var(--text-muted);font-size:13px;grid-column:1/-1;">
+            <i class="fa-solid fa-inbox" style="font-size:2rem;opacity:0.2;display:block;margin-bottom:12px;"></i>
+            Aucune tâche trouvée.
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
 <script>
 function applyFilters() {
-    const search = document.getElementById('search').value.toLowerCase();
-    const status = document.getElementById('status').value;
-    const project = document.getElementById('project').value;
+    const search   = document.getElementById('search').value.toLowerCase();
+    const status   = document.getElementById('status').value;
+    const project  = document.getElementById('project').value;
     const priority = document.getElementById('priority').value;
 
     document.querySelectorAll('.kanban-column-t').forEach(column => {
@@ -226,39 +227,38 @@ function applyFilters() {
         let visibleTasks = 0;
 
         column.querySelectorAll('.task-card').forEach(card => {
-            const title = card.querySelector('.task-title').textContent.toLowerCase();
-            const desc = (card.querySelector('.task-description')?.textContent || "").toLowerCase();
-            const cardStatus = card.querySelector('.status-badge').textContent.trim();
-            const cardPriority = card.querySelector('.priority-badge').textContent.trim();
+            const title       = card.querySelector('.task-title')?.textContent.toLowerCase() ?? '';
+            const desc        = card.querySelector('.task-description')?.textContent.toLowerCase() ?? '';
+            const cardStatus  = card.querySelector('.status-badge')?.textContent.trim() ?? '';
+            const cardPrio    = card.querySelector('.priority-badge')?.textContent.trim() ?? '';
 
-            const matchSearch = !search || title.includes(search) || desc.includes(search);
-            const matchStatus = !status || cardStatus === status;
-            const matchProject = !project || columnTitle === project;
-            const matchPriority = !priority || cardPriority === priority;
+            const matchSearch   = !search   || title.includes(search) || desc.includes(search);
+            const matchStatus   = !status   || cardStatus.includes(status);
+            const matchProject  = !project  || columnTitle === project;
+            const matchPriority = !priority || cardPrio.includes(priority);
 
-            const isVisible = matchSearch && matchStatus && matchProject && matchPriority;
-
-            card.style.display = isVisible ? "block" : "none";
-            if (isVisible) visibleTasks++;
+            const visible = matchSearch && matchStatus && matchProject && matchPriority;
+            card.style.display = visible ? 'block' : 'none';
+            if (visible) visibleTasks++;
         });
 
-        column.style.display = visibleTasks > 0 ? "block" : "none";
+        column.style.display = visibleTasks > 0 ? 'block' : 'none';
     });
 }
 
-["search", "status", "project", "priority"].forEach(id => {
-    document.getElementById(id).addEventListener(id === "search" ? "input" : "change", applyFilters);
+['search', 'status', 'project', 'priority'].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener(id === 'search' ? 'input' : 'change', applyFilters);
 });
 
-document.getElementById("reset-filters").addEventListener("click", () => {
-    document.getElementById("search").value = "";
-    document.getElementById("status").value = "";
-    document.getElementById("project").value = "";
-    document.getElementById("priority").value = "";
+document.getElementById('reset-filters').addEventListener('click', () => {
+    ['search', 'status', 'project', 'priority'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = '';
+    });
     applyFilters();
 });
 
-window.addEventListener("DOMContentLoaded", applyFilters);
+window.addEventListener('DOMContentLoaded', applyFilters);
 </script>
-
 {% endblock %}

@@ -1,12 +1,13 @@
 {% if task.project.users.contains(app.user) %}
 <form method="post"
       action="{{ path('front_tasks_delete', {'id': task.id}) }}"
-      onsubmit="return confirm('Voulez-vous vraiment supprimer cette tâche ?');">
+      onsubmit="return confirm('Voulez-vous vraiment supprimer cette tâche ?');"
+      style="display:inline;">
 
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ task.id) }}">
 
-    <button class="btn-glass {{ btn_class|default('') }}">
-        <i class="bi bi-trash"></i> Supprimer
+    <button type="submit" class="btn-glass btn-glass-red {{ btn_class|default('') }}">
+        <i class="fa-solid fa-trash"></i> Supprimer
     </button>
 </form>
 {% endif %}
