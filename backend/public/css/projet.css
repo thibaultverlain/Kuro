@@ -1,6 +1,6 @@
 /* =========================================================
-   KURO — PROJET CSS
-   Hérite du design system de accueil.css
+   KURO — PROJET CSS v2
+   Hérite du design system accueil.css
 ========================================================= */
 
 /* =========================================================
@@ -27,7 +27,7 @@
     justify-content: center;
     font-size: 12px;
     font-weight: 600;
-    padding: 9px 16px;
+    padding: 8px 14px;
     cursor: pointer;
     color: var(--text-muted);
     position: relative;
@@ -37,18 +37,17 @@
 }
 
 .glass-radio-group .d-flex:hover { color: var(--text-primary); }
-.glass-radio-group input:checked + .d-flex { color: white; }
+.glass-radio-group input:checked + .d-flex { color: var(--bg-root); }
 
 .glass-glider {
     position: absolute;
     top: 2px; bottom: 2px;
     width: calc((100% - 4px) / 3);
     left: 2px;
-    background: var(--grad-violet);
+    background: var(--teal);
     border-radius: calc(var(--r-lg) - 3px);
     z-index: 1;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: var(--shadow-glow-sm);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 #filter-all:checked    ~ .glass-glider { transform: translateX(0); }
@@ -62,7 +61,7 @@
 .projects-grid {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .project-card {
@@ -70,7 +69,7 @@
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--r-lg);
-    padding: 20px 24px;
+    padding: 16px 20px;
     transition: var(--transition);
     position: relative;
     overflow: hidden;
@@ -85,7 +84,7 @@
     position: absolute;
     left: 0; top: 0; bottom: 0;
     width: 3px;
-    background: var(--grad-violet);
+    background: var(--teal);
     opacity: 0;
     transition: var(--transition);
 }
@@ -93,8 +92,7 @@
 .project-card:hover {
     border-color: var(--border);
     background: var(--bg-elevated);
-    box-shadow: var(--shadow-glow-sm);
-    transform: translateX(4px);
+    transform: translateX(3px);
     color: inherit;
 }
 
@@ -104,17 +102,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .project-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 600;
     margin: 0;
     color: var(--text-primary);
-    background: none;
-    -webkit-text-fill-color: unset;
 }
 
 .project-date {
@@ -127,16 +122,11 @@
 .project-desc {
     color: var(--text-secondary);
     font-size: 13px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     line-height: 1.5;
 }
 
-.project-desc i { color: var(--violet-light); margin-right: 5px; }
-
-.project-tasks ul {
-    padding-left: 18px;
-    margin: 0;
-}
+.project-desc i { color: var(--teal); margin-right: 5px; }
 
 /* =========================================================
    PROJECT ACTIONS
@@ -144,7 +134,7 @@
 
 .project-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
@@ -154,24 +144,23 @@
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
+    gap: 5px;
+    padding: 6px 12px;
     font-size: 12px;
-    font-weight: 600;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--violet-light);
-    border: 1px solid var(--border);
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    color: var(--teal);
+    border: 1px solid rgba(45, 212, 191, 0.25);
     border-radius: var(--r-md);
-    background: var(--violet-soft);
+    background: var(--teal-soft);
     transition: var(--transition);
     text-decoration: none;
 }
 
 .project-actions .btn-sm:hover {
-    background: var(--violet);
-    color: white;
-    border-color: var(--violet);
-    box-shadow: var(--shadow-glow-sm);
+    background: var(--teal);
+    color: var(--bg-root);
+    border-color: var(--teal);
     transform: translateY(-1px);
 }
 
@@ -181,8 +170,8 @@
 .project-actions button[type="submit"].btn-danger,
 .project-actions .btn-sm.btn-outline-danger {
     color: var(--red);
-    border-color: rgba(255,59,107,0.3);
-    background: rgba(255,59,107,0.08);
+    border-color: rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.08);
 }
 
 .project-actions .btn-delete:hover,
@@ -191,7 +180,6 @@
     background: var(--red);
     border-color: var(--red);
     color: white;
-    box-shadow: 0 4px 14px rgba(255,59,107,0.3);
 }
 
 /* =========================================================
@@ -200,14 +188,13 @@
 
 .page-title,
 .modern-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 2rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, var(--text-primary) 30%, var(--violet-light) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
     margin: 0 0 4px;
+    -webkit-text-fill-color: unset;
+    background: none;
 }
 
 /* =========================================================
@@ -216,8 +203,8 @@
 
 .kanban-board {
     display: flex;
-    gap: 14px;
-    margin-top: 16px;
+    gap: 12px;
+    margin-top: 14px;
     flex-wrap: wrap;
 }
 
@@ -227,28 +214,26 @@
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
     border-radius: var(--r-lg);
-    padding: 14px;
+    padding: 12px;
     transition: var(--transition);
 }
 
-.kanban-column:hover {
-    border-color: var(--border);
-}
+.kanban-column:hover { border-color: var(--border); }
 
 .kanban-title {
     text-align: center;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 12px;
-    padding: 6px 12px;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+    padding: 5px 10px;
     border-radius: var(--r-sm);
 }
 
-.status-en-cours   { background: rgba(6,214,255,0.1); color: var(--cyan); }
-.status-termine    { background: rgba(0,229,160,0.1); color: var(--emerald); }
-.status-retard     { background: rgba(255,59,107,0.1); color: var(--red); }
+.status-en-cours   { background: rgba(45,212,191,0.1); color: var(--teal); }
+.status-termine    { background: rgba(16,185,129,0.1); color: var(--emerald); }
+.status-retard     { background: rgba(239,68,68,0.1); color: var(--red); }
 .status-en-attente { background: rgba(245,158,11,0.1); color: var(--amber); }
 
 /* =========================================================
@@ -259,48 +244,42 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 999px;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
 }
 
 .priority-badge.priority-tres-faible {
-    background: rgba(94,90,122,0.15);
+    background: rgba(88,88,120,0.15);
     color: var(--text-muted);
-    border: 1px solid rgba(94,90,122,0.25);
+    border: 1px solid rgba(88,88,120,0.2);
 }
 
 .priority-badge.priority-faible {
-    background: var(--violet-soft);
-    color: var(--violet-light);
-    border: 1px solid var(--border);
+    background: var(--teal-soft);
+    color: var(--teal);
+    border: 1px solid rgba(45, 212, 191, 0.2);
 }
 
 .priority-badge.priority-modere {
-    background: rgba(245,158,11,0.12);
+    background: rgba(245,158,11,0.1);
     color: var(--amber);
-    border: 1px solid rgba(245,158,11,0.25);
+    border: 1px solid rgba(245,158,11,0.2);
 }
 
 .priority-badge.priority-eleve {
-    background: rgba(0,229,160,0.12);
+    background: rgba(16,185,129,0.1);
     color: var(--emerald);
-    border: 1px solid rgba(0,229,160,0.25);
+    border: 1px solid rgba(16,185,129,0.2);
 }
 
 .priority-badge.priority-tres-eleve {
-    background: rgba(255,59,107,0.12);
+    background: rgba(239,68,68,0.1);
     color: var(--red);
-    border: 1px solid rgba(255,59,107,0.25);
-    animation: pulseSubtle 3s ease-in-out infinite;
-}
-
-@keyframes pulseSubtle {
-    0%, 100% { box-shadow: none; }
-    50% { box-shadow: 0 0 10px rgba(255,59,107,0.3); }
+    border: 1px solid rgba(239,68,68,0.2);
 }
 
 /* =========================================================
@@ -311,14 +290,13 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
-.tasks-header i { color: var(--violet-light); }
+.tasks-header i { color: var(--teal); }
 
 .task-title-link {
     text-decoration: none;
@@ -326,26 +304,25 @@
     transition: var(--transition);
 }
 
-.task-title-link:hover { color: var(--violet-light); }
+.task-title-link:hover { color: var(--teal); }
 
 .empty-state-text {
     text-align: center;
     padding: 2rem;
     color: var(--text-muted);
     font-size: 13px;
-    font-style: italic;
 }
 
 .empty-state-text i {
     display: block;
     font-size: 2rem;
     margin-bottom: 8px;
-    opacity: 0.25;
+    opacity: 0.2;
 }
 
 .drag-ghost {
     opacity: 0.4;
-    background: var(--violet-soft);
+    background: var(--teal-soft);
     transform: rotate(1deg);
 }
 
@@ -353,7 +330,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     cursor: grab;
 }
 
@@ -366,18 +343,18 @@
 .project-form { padding: 8px 0; }
 
 .project-form .form-group,
-.project-form .mb-3 { margin-bottom: 20px; }
+.project-form .mb-3 { margin-bottom: 18px; }
 
 .project-form label {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--text-muted);
     margin-bottom: 6px;
     font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.4px;
 }
 
 .project-form input[type="text"],
@@ -385,27 +362,24 @@
 .project-form textarea,
 .project-form select {
     width: 100%;
-    padding: 10px 14px;
+    padding: 9px 12px;
     border: 1px solid var(--border-subtle);
     border-radius: var(--r-md);
     background: var(--bg-elevated);
     color: var(--text-primary);
     font-size: 13.5px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     transition: var(--transition);
 }
 
-.project-form textarea {
-    min-height: 110px;
-    resize: vertical;
-}
+.project-form textarea { min-height: 100px; resize: vertical; }
 
 .project-form input:focus,
 .project-form textarea:focus,
 .project-form select:focus {
     outline: none;
-    border-color: var(--violet);
-    box-shadow: 0 0 0 3px var(--violet-soft);
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px var(--teal-soft);
     background: var(--bg-card);
 }
 
@@ -413,25 +387,22 @@
 .project-form button[type="submit"] {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 10px 20px;
+    gap: 6px;
+    padding: 9px 18px;
     border-radius: var(--r-md);
     font-weight: 600;
-    font-size: 13.5px;
-    font-family: 'DM Sans', sans-serif;
-    border: 1px solid var(--border);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    border: none;
     cursor: pointer;
     transition: var(--transition);
-    background: var(--violet-soft);
-    color: var(--violet-light);
+    background: var(--teal);
+    color: var(--bg-root);
 }
 
 .project-form .btn:hover,
 .project-form button[type="submit"]:hover {
-    background: var(--violet);
-    color: white;
-    border-color: var(--violet);
-    box-shadow: var(--shadow-glow-sm);
+    background: var(--teal-dark);
     transform: translateY(-1px);
 }
 
@@ -448,11 +419,11 @@
 .project-form .invalid-feedback::before { content: '⚠'; }
 .project-form .is-invalid { border-color: var(--red); }
 
-.project-form select[multiple] { min-height: 130px; }
+.project-form select[multiple] { min-height: 120px; }
 
 .project-form select[multiple] option:checked {
-    background: var(--violet);
-    color: white;
+    background: var(--teal);
+    color: var(--bg-root);
 }
 
 /* =========================================================
@@ -461,12 +432,12 @@
 
 .task-date {
     font-size: 11px;
-    color: var(--violet-light);
+    color: var(--teal);
     font-weight: 600;
-    background: var(--violet-soft);
-    padding: 5px 10px;
+    background: var(--teal-soft);
+    padding: 4px 8px;
     border-radius: var(--r-sm);
-    border: 1px solid var(--border);
+    border: 1px solid rgba(45, 212, 191, 0.2);
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
