@@ -6,6 +6,7 @@ use App\Repository\NotificationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -33,12 +34,44 @@ final class NotificationController extends AbstractController
     {
         $notifications = $repo->findBy(
             ['user' => $this->getUser(), 'isRead' => false],
-            ['createdAt' => 'DESC']
+            ['createdAt' => 'DESC'],
+            10 // max 10 dans le panel
         );
 
         return $this->render('front/notification/_ajax_list.html.twig', [
             'notifications' => $notifications,
         ]);
+    }
+
+    /**
+     * Marque comme lu ET redirige vers le lien de la notification.
+     * Gère proprement le cas où la ressource cible a été supprimée.
+     */
+    #[Route('/{id}/open', name: 'notifications_open', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function open(
+        int $id,
+        NotificationRepository $repo,
+        EntityManagerInterface $em
+    ): Response {
+        $notification = $repo->find($id);
+
+        if (!$notification || $notification->getUser() !== $this->getUser()) {
+            throw $this->createNotFoundException('Notification introuvable.');
+        }
+
+        // Marquer comme lu
+        if (!$notification->isRead()) {
+            $notification->setIsRead(true);
+            $em->flush();
+        }
+
+        // Rediriger vers le lien si valide, sinon vers la liste
+        $link = $notification->getLink();
+        if ($link) {
+            return new RedirectResponse($link);
+        }
+
+        return $this->redirectToRoute('notifications_index');
     }
 
     #[Route('/{id}/read', name: 'notifications_mark_read', methods: ['POST'], requirements: ['id' => '\d+'])]
@@ -81,6 +114,8 @@ final class NotificationController extends AbstractController
         }
 
         $em->flush();
+
+        $this->addFlash('success', 'Toutes les notifications ont été marquées comme lues.');
 
         return $this->redirectToRoute('notifications_index');
     }

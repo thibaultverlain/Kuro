@@ -1,47 +1,271 @@
 {% extends 'base_front.html.twig' %}
 
-{% block title %}Mes notifications{% endblock %}
+{% block title %}Notifications — Kuro{% endblock %}
 
 {% block body %}
 <div class="container mt-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h4 page-title">
-            <i class="fa-solid fa-bell me-2"></i>
-            Mes notifications
-        </h1>
-
-        {% if notifications|filter(n => not n.isRead)|length > 0 %}
-        <form method="post" action="{{ path('notifications_read_all') }}">
-            <input type="hidden" name="_token" value="{{ csrf_token('notif_read_all') }}">
-            <button class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-check2-all"></i> Tout marquer comme lu
-            </button>
-        </form>
-        {% endif %}
+    {# Header #}
+    <div class="page-header-modern mb-4">
+        <div class="header-content">
+            <div class="header-title-section">
+                <h1 class="modern-title">
+                    <i class="fa-solid fa-bell me-2"></i>Notifications
+                </h1>
+                <p class="header-subtitle">
+                    {% set unread = notifications|filter(n => not n.isRead)|length %}
+                    {% if unread > 0 %}
+                        {{ unread }} non lue{{ unread > 1 ? 's' : '' }}
+                    {% else %}
+                        Tout est à jour
+                    {% endif %}
+                </p>
+            </div>
+            {% if notifications|filter(n => not n.isRead)|length > 0 %}
+            <div>
+                <form method="post" action="{{ path('notifications_read_all') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('notif_read_all') }}">
+                    <button type="submit" class="btn-glass">
+                        <i class="fa-solid fa-check-double"></i> Tout marquer comme lu
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
     </div>
 
     {% if notifications is empty %}
-        <p class="text-muted">Aucune notification.</p>
+        <div class="dashboard-block text-center py-5">
+            <i class="fa-solid fa-bell-slash" style="font-size:3rem;opacity:.15;display:block;margin-bottom:1rem;color:var(--violet-light)"></i>
+            <p class="block-title" style="justify-content:center">Aucune notification</p>
+            <p style="color:var(--text-muted);font-size:13px">Vous recevrez des notifications quand des tâches vous seront assignées.</p>
+        </div>
     {% else %}
-        <ul class="list-group">
-        {% for n in notifications %}
-            <li class="list-group-item d-flex justify-content-between align-items-start {{ not n.isRead ? 'list-group-item-light fw-semibold' : '' }}">
-                <div>
-                    <small class="text-muted me-2">{{ n.createdAt|date('d/m/Y H:i') }}</small>
-                    {% if n.link %}
-                        <a href="{{ n.link }}">{{ n.message }}</a>
-                    {% else %}
-                        {{ n.message }}
-                    {% endif %}
+        <div class="notif-page-list">
+            {% for n in notifications %}
+                <div class="notif-page-item {{ not n.isRead ? 'unread' : 'read' }}">
+
+                    {# Indicateur gauche #}
+                    <div class="notif-page-indicator"></div>
+
+                    {# Icône type #}
+                    <div class="notif-page-icon">
+                        {% if n.type == 'task_assigned' %}
+                            <i class="fa-solid fa-user-plus"></i>
+                        {% elseif n.type == 'task_created' %}
+                            <i class="fa-solid fa-plus"></i>
+                        {% elseif n.type == 'task_updated' %}
+                            <i class="fa-solid fa-pen"></i>
+                        {% elseif n.type == 'task_deleted' %}
+                            <i class="fa-solid fa-trash"></i>
+                        {% else %}
+                            <i class="fa-solid fa-bell"></i>
+                        {% endif %}
+                    </div>
+
+                    {# Contenu #}
+                    <div class="notif-page-content">
+                        <div class="notif-page-header">
+                            {% if n.type == 'task_assigned' %}
+                                <span class="notif-type-badge assigned">Assignée</span>
+                            {% elseif n.type == 'task_created' %}
+                                <span class="notif-type-badge created">Créée</span>
+                            {% elseif n.type == 'task_updated' %}
+                                <span class="notif-type-badge updated">Modifiée</span>
+                            {% else %}
+                                <span class="notif-type-badge">Info</span>
+                            {% endif %}
+                            <span class="notif-page-date">
+                                <i class="fa-regular fa-clock"></i>
+                                {{ n.createdAt|date('d/m/Y à H:i') }}
+                            </span>
+                            {% if not n.isRead %}
+                                <span class="notif-unread-dot"></span>
+                            {% endif %}
+                        </div>
+
+                        <p class="notif-page-message">{{ n.message }}</p>
+
+                        <div class="notif-page-actions">
+                            {% if n.link %}
+                                <a href="{{ path('notifications_open', {'id': n.id}) }}" class="btn-glass btn-small">
+                                    <i class="fa-solid fa-arrow-right"></i> Voir la tâche
+                                </a>
+                            {% endif %}
+                            {% if not n.isRead %}
+                                <button
+                                    class="btn-reset btn-small notif-mark-btn"
+                                    data-id="{{ n.id }}"
+                                    data-token="{{ csrf_token('notif_read') }}">
+                                    <i class="fa-solid fa-check"></i> Marquer comme lu
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                {% if not n.isRead %}
-                    <span class="badge bg-primary rounded-pill">Nouveau</span>
-                {% endif %}
-            </li>
-        {% endfor %}
-        </ul>
+            {% endfor %}
+        </div>
     {% endif %}
 
 </div>
+
+<style>
+.notif-page-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.notif-page-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--r-lg);
+    padding: 18px 20px;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.notif-page-item:hover {
+    border-color: var(--border);
+    box-shadow: var(--shadow-glow-sm);
+    transform: translateX(4px);
+}
+
+.notif-page-item.unread {
+    border-color: var(--border);
+    background: var(--bg-elevated);
+}
+
+.notif-page-item.read {
+    opacity: 0.65;
+}
+
+.notif-page-indicator {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--grad-violet);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.notif-page-item.unread .notif-page-indicator { opacity: 1; }
+.notif-page-item:hover .notif-page-indicator { opacity: 1; }
+
+.notif-page-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--r-md);
+    background: var(--violet-soft);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--violet-light);
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.notif-page-item.read .notif-page-icon {
+    background: var(--bg-elevated);
+    color: var(--text-muted);
+}
+
+.notif-page-content { flex: 1; min-width: 0; }
+
+.notif-page-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+.notif-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: var(--violet-soft);
+    color: var(--violet-light);
+    border: 1px solid var(--border);
+}
+
+.notif-type-badge.assigned { background: rgba(6,214,255,0.1); color: var(--cyan); border-color: rgba(6,214,255,0.2); }
+.notif-type-badge.created  { background: rgba(0,229,160,0.1); color: var(--emerald); border-color: rgba(0,229,160,0.2); }
+.notif-type-badge.updated  { background: rgba(245,158,11,0.1); color: var(--amber); border-color: rgba(245,158,11,0.2); }
+
+.notif-page-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.notif-unread-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--violet-light);
+    box-shadow: 0 0 6px var(--violet-glow);
+    margin-left: auto;
+    animation: pulseBadge 2s infinite;
+}
+
+.notif-page-message {
+    font-size: 13.5px;
+    color: var(--text-primary);
+    line-height: 1.5;
+    margin: 0 0 10px;
+}
+
+.notif-page-item.read .notif-page-message {
+    color: var(--text-secondary);
+}
+
+.notif-page-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+</style>
+
+<script>
+document.querySelectorAll('.notif-mark-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const id    = this.dataset.id;
+        const token = this.dataset.token;
+        const item  = this.closest('.notif-page-item');
+
+        fetch('/notification/' + id + '/read', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: '_token=' + encodeURIComponent(token)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                item.classList.remove('unread');
+                item.classList.add('read');
+                item.querySelector('.notif-page-indicator').style.opacity = '0';
+                const dot = item.querySelector('.notif-unread-dot');
+                if (dot) dot.remove();
+                this.remove();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
