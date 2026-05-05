@@ -3,44 +3,62 @@
 {% block title %}Liste des rôles{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 text-primary">Liste des rôles</h1>
-        <a href="{{ path('admin_role_new') }}" class="btn btn-success">
-            <i class="bi bi-plus-circle"></i> Nouveau rôle
+
+<div class="page-header-modern mb-4">
+    <div class="header-content">
+        <div class="header-title-section">
+            <h1 class="modern-title">Rôles</h1>
+            <p class="header-subtitle">{{ roles|length }} rôle{{ roles|length > 1 ? 's' : '' }}</p>
+        </div>
+        <a href="{{ path('admin_role_new') }}" class="btn-glass">
+            <i class="fa-solid fa-plus"></i> Nouveau rôle
         </a>
     </div>
+</div>
 
+<div class="users-table-wrapper">
     <div class="table-responsive">
-        <table class="table table-hover align-middle shadow-sm">
-            <thead class="table-dark">
+        <table class="modern-table">
+            <thead>
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Nom</th>
-                    <th scope="col">Actions</th>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
-            {% for role in roles %}
-                <tr>
-                    <td>{{ role.id }}</td>
-                    <td>{{ role.name }}</td>
-                    <td>
-                        <a href="{{ path('admin_role_show', {'id': role.id}) }}" class="btn btn-sm btn-outline-info me-2">
-                            <i class="bi bi-eye"></i> Voir
-                        </a>
-                        <a href="{{ path('admin_role_edit', {'id': role.id}) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-pencil"></i> Modifier
-                        </a>
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="3" class="text-center text-muted">Aucun rôle trouvé</td>
-                </tr>
-            {% endfor %}
+                {% for role in roles %}
+                    <tr>
+                        <td><span class="id-badge">{{ role.id }}</span></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div style="width:30px;height:30px;border-radius:var(--r-md);background:var(--teal-soft);border:1px solid rgba(45,212,191,0.2);display:flex;align-items:center;justify-content:center;color:var(--teal);font-size:12px;">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <span style="font-weight:600;color:var(--text-primary);font-size:13px;">{{ role.name }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ path('admin_role_show', {'id': role.id}) }}" class="btn-action btn-view" title="Voir">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="{{ path('admin_role_edit', {'id': role.id}) }}" class="btn-action btn-edit" title="Modifier">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align:center;color:var(--text-muted);padding:2rem;font-size:13px;">
+                            Aucun rôle trouvé
+                        </td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
 {% endblock %}

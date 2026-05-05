@@ -6,144 +6,196 @@
 
 {% if task.project.users.contains(app.user) %}
 
-<div class="container mt-5">
-
-    <div class="task-card">
-
-        <div class="task-header">
-            <div class="task-title-section">
-                <strong class="task-title">{{ task.title }}</strong>
-
-                {% if task.description %}
-                    <small class="task-description">
-                        {{ task.description }}
-                    </small>
-                {% endif %}
-            </div>
-
-            {% if task.dueDate %}
-                <span class="task-date">
-                    <i class="bi bi-calendar-event"></i>
-                    {{ task.dueDate|date('d F Y') }}
-                </span>
-            {% endif %}
-        </div>
-
-        <div class="task-meta">
-
-            {% if task.priority %}
-                {% set priorityName = task.priority.name %}
-                {% set priorityMap = {
-                    'Tres faible': 'tres-faible',
-                    'Faible': 'faible',
-                    'Modere': 'modere',
-                    'Eleve': 'eleve',
-                    'Tres eleve': 'tres-eleve'
-                } %}
-                {% set priorityClass = priorityMap[priorityName]|default('') %}
-
-                <span class="priority-badge {{ priorityClass ? 'priority-' ~ priorityClass : '' }}">
-                    <i class="bi bi-flag-fill"></i>
-                    {{ priorityName }}
-                </span>
-            {% endif %}
-
-            {% if task.status %}
-                {% set statusName = task.status.name %}
-                {% set statusMap = {
-                    'En cours': 'en-cours',
-                    'Terminee': 'termine',
-                    'En retard': 'retard',
-                    'En attente': 'en-attente'
-                } %}
-                {% set statusClass = statusMap[statusName]|default('') %}
-
-                <span class="status-badge {{ statusClass ? 'status-' ~ statusClass : '' }}">
-                    <i class="bi bi-circle-fill status-icon"></i>
-                    {{ statusName }}
-                </span>
-            {% endif %}
-
-            {% if task.createdAt %}
-                <span class="meta-pill">
-                    <i class="bi bi-plus-circle"></i>
-                    {{ task.createdAt|date('d F Y') }}
-                </span>
-            {% endif %}
-
-            {% if task.lastChangedAt %}
-                <span class="meta-pill">
-                    <i class="bi bi-pencil"></i>
-                    {{ task.lastChangedAt|date('d F Y') }}
-                </span>
-            {% endif %}
-        </div>
-
-        <div class="task-actions">
-
-            {% if task.project.users.contains(app.user) %}
-                <a href="{{ path('front_tasks_by_project', { id: task.project.id }) }}"
-                   class="btn-glass btn-small">
-                    <i class="bi bi-arrow-left"></i> Retour
-                </a>
-            {% endif %}
-
+{# =========================================================
+   PAGE HEADER
+========================================================= #}
+<div class="page-header-modern mb-4">
+    <div class="header-content">
+        <div class="header-title-section">
+            <h1 class="modern-title">{{ task.title }}</h1>
             {% if task.project %}
-                <a href="{{ path('front_project_show', {'id': task.project.id}) }}"
-                   class="btn-glass btn-small">
-                    <i class="bi bi-folder2-open"></i>
+                <p class="header-subtitle">
+                    <i class="fa-solid fa-folder-open" style="font-size:11px;"></i>
                     {{ task.project.name }}
-                </a>
+                </p>
             {% endif %}
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="{{ path('front_tasks_by_project', { id: task.project.id }) }}" class="btn-reset">
+                <i class="fa-solid fa-arrow-left"></i> Retour
+            </a>
+            <a href="{{ path('front_tasks_edit', {'id': task.id}) }}" class="btn-glass">
+                <i class="fa-solid fa-pen"></i> Modifier
+            </a>
+            {{ include('front/tasks/_delete_form.html.twig', { task: task, btn_class: 'btn-small' }) }}
+        </div>
+    </div>
+</div>
 
-            {% if task.project.users.contains(app.user) %}
-                <a href="{{ path('front_tasks_edit', {'id': task.id}) }}"
-                   class="btn-glass btn-small">
-                    <i class="bi bi-pencil"></i> Modifier
-                </a>
+<div class="row g-3">
 
-                {{ include('front/tasks/_delete_form.html.twig', {
-                    task: task,
-                    btn_class: 'btn-glass-red btn-small'
-                }) }}
-            {% endif %}
+    {# =========================================================
+       DÉTAILS DE LA TÂCHE
+    ========================================================= #}
+    <div class="col-md-8">
+        <div class="task-card-form">
+            <div class="task-card-header">
+                <h2 class="task-card-title">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Détails
+                </h2>
+            </div>
+            <div class="task-card-body">
 
+                {# Description #}
+                {% if task.description %}
+                    <div style="margin-bottom:20px;">
+                        <div class="filter-label" style="margin-bottom:8px;">
+                            <i class="fa-solid fa-align-left"></i> Description
+                        </div>
+                        <p style="color:var(--text-secondary);font-size:13.5px;line-height:1.6;margin:0;">
+                            {{ task.description }}
+                        </p>
+                    </div>
+                {% endif %}
+
+                {# Badges statut + priorité #}
+                <div class="task-meta" style="margin-bottom:20px;">
+                    {% if task.priority %}
+                        {% set priorityMap = {
+                            'Tres faible': 'tres-faible',
+                            'Faible': 'faible',
+                            'Modere': 'modere',
+                            'Eleve': 'eleve',
+                            'Tres eleve': 'tres-eleve'
+                        } %}
+                        {% set priorityClass = priorityMap[task.priority.name]|default('') %}
+                        <span class="priority-badge priority-{{ priorityClass }}">
+                            <i class="fa-solid fa-flag"></i>
+                            {{ task.priority.name }}
+                        </span>
+                    {% endif %}
+
+                    {% if task.status %}
+                        {% set statusMap = {
+                            'En cours':  'en-cours',
+                            'Terminée':  'termine',
+                            'En retard': 'retard',
+                            'À faire':   'en-attente'
+                        } %}
+                        {% set statusClass = statusMap[task.status.name]|default('') %}
+                        <span class="status-badge status-{{ statusClass }}">
+                            <i class="fa-solid fa-circle status-icon"></i>
+                            {{ task.status.name }}
+                        </span>
+                    {% endif %}
+
+                    {% if task.dueDate %}
+                        <span class="task-date">
+                            <i class="fa-regular fa-calendar"></i>
+                            {{ task.dueDate|date('d/m/Y') }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                {# Infos supplémentaires #}
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    {% if task.createdAt %}
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--r-md);">
+                            <span style="font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:8px;">
+                                <i class="fa-solid fa-plus" style="color:var(--teal);"></i> Créée le
+                            </span>
+                            <span style="font-size:13px;color:var(--text-primary);font-weight:500;">
+                                {{ task.createdAt|date('d/m/Y') }}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    {% if task.lastChangedAt %}
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--r-md);">
+                            <span style="font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:8px;">
+                                <i class="fa-solid fa-pen" style="color:var(--teal);"></i> Modifiée le
+                            </span>
+                            <span style="font-size:13px;color:var(--text-primary);font-weight:500;">
+                                {{ task.lastChangedAt|date('d/m/Y') }}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    {% if task.project %}
+                        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--r-md);">
+                            <span style="font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:8px;">
+                                <i class="fa-solid fa-folder-open" style="color:var(--teal);"></i> Projet
+                            </span>
+                            <a href="{{ path('front_project_show', {'id': task.project.id}) }}"
+                               style="font-size:13px;color:var(--teal);font-weight:500;text-decoration:none;">
+                                {{ task.project.name }}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Assignés #}
+                {% if task.users is not empty %}
+                    <div style="margin-top:20px;">
+                        <div class="filter-label" style="margin-bottom:10px;">
+                            <i class="fa-solid fa-users"></i> Assignés
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            {% for assignee in task.users %}
+                                <div style="display:flex;align-items:center;gap:8px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:999px;padding:5px 12px 5px 6px;">
+                                    <div style="width:26px;height:26px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;color:var(--bg-root);font-size:11px;font-weight:700;">
+                                        {{ assignee.name|slice(0,1)|upper }}
+                                    </div>
+                                    <span style="font-size:13px;color:var(--text-primary);font-weight:500;">{{ assignee.name }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+
+            </div>
         </div>
     </div>
 
-    <div class="task-card mt-4">
-
-        <div class="kanban-title-t">
-            <i class="bi bi-clock-history"></i>
-            Historique des modifications
-        </div>
-
-        {% if task.history is not empty %}
-            <div class="task-meta">
+    {# =========================================================
+       HISTORIQUE
+    ========================================================= #}
+    <div class="col-md-4">
+        <div class="dashboard-block h-100">
+            <h2 class="block-title">Historique</h2>
+            <div class="history-list">
                 {% for entry in task.history %}
-                    <span class="meta-pill">
-                        <i class="bi bi-clock"></i>
-                        {{ entry.updatedAt|date('d/m/Y H:i') }}
-                        — {{ entry.changelog }}
+                    <div style="padding:10px 12px;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--r-md);margin-bottom:6px;">
+                        <div style="font-size:11px;color:var(--teal);font-weight:600;margin-bottom:3px;">
+                            <i class="fa-regular fa-clock"></i>
+                            {{ entry.updatedAt|date('d/m/Y H:i') }}
+                        </div>
+                        <div style="font-size:13px;color:var(--text-primary);">
+                            {{ entry.changelog }}
+                        </div>
                         {% if entry.author %}
-                            ({{ entry.author.name }})
+                            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+                                <i class="fa-solid fa-user"></i>
+                                {{ entry.author.name }}
+                            </div>
                         {% endif %}
-                    </span>
+                    </div>
+                {% else %}
+                    <div class="empty-state-text">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        Aucune modification enregistrée.
+                    </div>
                 {% endfor %}
             </div>
-        {% else %}
-            <p class="task-description">
-                Aucune modification enregistrée.
-            </p>
-        {% endif %}
-
+        </div>
     </div>
 
 </div>
 
 {% else %}
-<div class="alert alert-danger mt-5">
-    Accès refusé.
+<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--r-md);padding:16px;color:var(--red);font-size:13px;">
+    <i class="fa-solid fa-circle-exclamation me-2"></i> Accès refusé.
 </div>
 {% endif %}
 

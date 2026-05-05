@@ -1,11 +1,30 @@
-<!DOCTYPE html>
+{% extends 'base_front.html.twig' %}
 
-<title>New Notification</title>
+{% block title %}Nouvelle notification — Kuro{% endblock %}
 
 {% block body %}
-    <h1>Create new Notification</h1>
 
-    {{ include('notification/_form.html.twig') }}
+<div class="page-header-modern mb-4">
+    <div class="header-content">
+        <div class="header-title-section">
+            <h1 class="modern-title">Nouvelle notification</h1>
+        </div>
+        <a href="{{ path('app_notification_index') }}" class="btn-reset">
+            <i class="fa-solid fa-arrow-left"></i> Retour
+        </a>
+    </div>
+</div>
 
-    <a href="{{ path('app_notification_index') }}">back to list</a>
+<div class="task-card-form" style="max-width: 680px;">
+    <div class="task-card-header">
+        <h2 class="task-card-title">
+            <i class="fa-solid fa-bell"></i>
+            Créer une notification
+        </h2>
+    </div>
+    <div class="task-card-body">
+        {{ include('notification/_form.html.twig') }}
+    </div>
+</div>
+
 {% endblock %}

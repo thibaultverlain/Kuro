@@ -6,44 +6,35 @@
 
 {% if project.users.contains(app.user) %}
 
-<div class="container mt-5">
-
-    <!-- Header avec titre et actions -->
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h1 class="h4 m-0 page-title">
-                <i class="fa-solid fa-tasks me-2"></i>
-                Nouvelle tâche
-            </h1>
+<div class="page-header-modern mb-4">
+    <div class="header-content">
+        <div class="header-title-section">
+            <h1 class="modern-title">Nouvelle tâche</h1>
             <p class="header-subtitle">Projet : {{ project.name }}</p>
         </div>
-
-        <a href="{{ path('front_project_show', {'id': project.id}) }}" class="btn btn-sm btn-glass-project">
+        <a href="{{ path('front_project_show', {'id': project.id}) }}" class="btn-reset">
             <i class="fa-solid fa-arrow-left"></i> Retour
         </a>
     </div>
+</div>
 
-    <!-- Carte formulaire -->
-    <div class="task-card-form">
-        <div class="task-card-header">
-            <h5 class="task-card-title">
-                <i class="fa-solid fa-file-pen me-2"></i>
-                Informations de la tâche
-            </h5>
-        </div>
-
-        <div class="task-card-body">
-            <div class="task-form">
-                {{ include('front/tasks/_form.html.twig') }}
-            </div>
+<div class="task-card-form" style="max-width: 680px;">
+    <div class="task-card-header">
+        <h2 class="task-card-title">
+            <i class="fa-solid fa-file-pen"></i>
+            Informations de la tâche
+        </h2>
+    </div>
+    <div class="task-card-body">
+        <div class="task-form">
+            {{ include('front/tasks/_form.html.twig') }}
         </div>
     </div>
-
 </div>
 
 {% else %}
-<div class="alert alert-danger mt-5">
-    Accès refusé.
+<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--r-md);padding:16px;color:var(--red);font-size:13px;">
+    <i class="fa-solid fa-circle-exclamation me-2"></i> Accès refusé.
 </div>
 {% endif %}
 

@@ -3,20 +3,31 @@
 {% block title %}Modifier le rôle{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-primary text-white">
-            <h1 class="h4 mb-0">Modifier le rôle</h1>
+
+<div class="page-header-modern mb-4">
+    <div class="header-content">
+        <div class="header-title-section">
+            <h1 class="modern-title">Modifier le rôle</h1>
         </div>
-        <div class="card-body">
-            {{ include('role/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
-        </div>
-        <div class="card-footer d-flex justify-content-between">
-            <a href="{{ path('admin_role_index') }}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i> Retour à la liste
-            </a>
-            {{ include('role/_delete_form.html.twig') }}
-        </div>
+        <a href="{{ path('admin_role_index') }}" class="btn-reset">
+            <i class="fa-solid fa-arrow-left"></i> Retour
+        </a>
     </div>
 </div>
+
+<div class="task-card-form" style="max-width: 680px;">
+    <div class="task-card-header">
+        <h2 class="task-card-title">
+            <i class="fa-solid fa-shield-halved"></i>
+            Informations du rôle
+        </h2>
+    </div>
+    <div class="task-card-body">
+        {{ include('role/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+    </div>
+    <div class="task-actions-footer">
+        {{ include('role/_delete_form.html.twig') }}
+    </div>
+</div>
+
 {% endblock %}

@@ -3,66 +3,82 @@
 {% block title %}Liste des projets{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 text-primary">Liste des projets</h1>
-        <a href="{{ path('admin_project_new') }}" class="btn btn-success">
-            <i class="bi bi-plus-circle"></i> Nouveau projet
+
+<div class="page-header-modern mb-4">
+    <div class="header-content">
+        <div class="header-title-section">
+            <h1 class="modern-title">Projets</h1>
+            <p class="header-subtitle">{{ projects|length }} projet{{ projects|length > 1 ? 's' : '' }}</p>
+        </div>
+        <a href="{{ path('admin_project_new') }}" class="btn-glass">
+            <i class="fa-solid fa-plus"></i> Nouveau projet
         </a>
     </div>
+</div>
 
+<div class="users-table-wrapper">
     <div class="table-responsive">
-        <table class="table table-hover align-middle shadow-sm">
-            <thead class="table-dark">
+        <table class="modern-table">
+            <thead>
                 <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Nom</th>
-                    <th scope="col">Description</th>
-                    <th scope="col">Créé le</th>
-                    <th scope="col">Tâches</th>
-                    <th scope="col">Actions</th>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th>Description</th>
+                    <th>Créé le</th>
+                    <th>Tâches</th>
+                    <th class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
-            {% for project in projects %}
-                <tr>
-                    <td>{{ project.id }}</td>
-                    <td>{{ project.name }}</td>
-                    <td>{{ project.description }}</td>
-                    <td>{{ project.createdAt ? project.createdAt|date('d/m/Y') : '' }}</td>
-                    <td>
-                        {% if project.tasks is not empty %}
-                            <ul class="mb-0">
-                                {% for task in project.tasks %}
-                                    <li>
-                                        {{ task.title }}
-                                        {% if task.dueDate %}
-                                            ({{ task.dueDate|date('d/m/Y') }})
-                                        {% endif %}
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <span class="text-muted">Aucune tâche</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{{ path('admin_project_show', {'id': project.id}) }}" class="btn btn-sm btn-outline-info me-2">
-                            <i class="bi bi-eye"></i> Voir
-                        </a>
-                        <a href="{{ path('admin_project_edit', {'id': project.id}) }}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-pencil"></i> Modifier
-                        </a>
-                        {{ include('admin/project/_delete_form.html.twig') }}
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="6" class="text-center text-muted">Aucun projet trouvé</td>
-                </tr>
-            {% endfor %}
+                {% for project in projects %}
+                    <tr>
+                        <td><span class="id-badge">{{ project.id }}</span></td>
+                        <td>
+                            <span style="font-weight:600;color:var(--text-primary);">{{ project.name }}</span>
+                        </td>
+                        <td>
+                            <span style="color:var(--text-secondary);font-size:12px;">
+                                {{ project.description|slice(0, 60) }}{% if project.description|length > 60 %}…{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="date-text">
+                                <i class="fa-regular fa-calendar"></i>
+                                {{ project.createdAt ? project.createdAt|date('d/m/Y') : '—' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if project.tasks is not empty %}
+                                <span class="meta-pill">
+                                    <i class="fa-solid fa-list-check"></i>
+                                    {{ project.tasks|length }} tâche{{ project.tasks|length > 1 ? 's' : '' }}
+                                </span>
+                            {% else %}
+                                <span style="color:var(--text-muted);font-size:12px;">Aucune tâche</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ path('admin_project_show', {'id': project.id}) }}" class="btn-action btn-view" title="Voir">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="{{ path('admin_project_edit', {'id': project.id}) }}" class="btn-action btn-edit" title="Modifier">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                {{ include('admin/project/_delete_form.html.twig') }}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;font-size:13px;">
+                            Aucun projet trouvé
+                        </td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
 {% endblock %}

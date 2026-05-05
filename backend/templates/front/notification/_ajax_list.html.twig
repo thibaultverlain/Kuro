@@ -1,28 +1,37 @@
 {% if notifications is empty %}
     <div class="notif-empty">
-        <i class="fa-solid fa-bell-slash" style="font-size:2rem;opacity:.2;display:block;margin-bottom:8px"></i>
+        <i class="fa-solid fa-bell-slash" style="font-size:2rem;opacity:.2;display:block;margin-bottom:8px;color:var(--text-muted);"></i>
         Aucune nouvelle notification.
     </div>
 {% else %}
-    <ul class="notif-list" style="list-style:none;padding:0;margin:0">
+    <ul class="notif-list">
         {% for n in notifications %}
             <li class="notif-item {{ n.isRead ? 'read' : 'unread' }}" id="notif-{{ n.id }}">
+
                 <div class="notif-header-line">
                     {% if n.type == 'task_assigned' %}
-                        <span class="notif-type notif-type-assigned">📌 Assignée</span>
+                        <span class="notif-type notif-type-assigned">
+                            <i class="fa-solid fa-thumbtack"></i> Assignée
+                        </span>
                     {% elseif n.type == 'task_created' %}
-                        <span class="notif-type notif-type-created">🆕 Créée</span>
+                        <span class="notif-type notif-type-created">
+                            <i class="fa-solid fa-plus"></i> Créée
+                        </span>
                     {% elseif n.type == 'task_updated' %}
-                        <span class="notif-type notif-type-updated">✏️ Modifiée</span>
+                        <span class="notif-type notif-type-updated">
+                            <i class="fa-solid fa-pen"></i> Modifiée
+                        </span>
                     {% else %}
-                        <span class="notif-type">🔔 Info</span>
+                        <span class="notif-type notif-type-assigned">
+                            <i class="fa-solid fa-bell"></i> Info
+                        </span>
                     {% endif %}
                     <small class="notif-date">{{ n.createdAt|date('d/m H:i') }}</small>
                 </div>
 
-                <p class="notif-message" style="margin:6px 0;font-size:13px;color:var(--text-secondary);line-height:1.4">
+                <p class="notif-message" style="margin:6px 0;font-size:13px;color:var(--text-secondary);line-height:1.4;">
                     {% if n.link %}
-                        <a href="{{ n.link }}" style="color:inherit;text-decoration:none">{{ n.message }}</a>
+                        <a href="{{ n.link }}" style="color:inherit;text-decoration:none;">{{ n.message }}</a>
                     {% else %}
                         {{ n.message }}
                     {% endif %}
@@ -32,10 +41,11 @@
                     <button
                         class="notif-mark-read"
                         onclick="markRead({{ n.id }}, '{{ csrf_token('notif_read') }}')"
-                        style="cursor:pointer;border:none;background:none;padding:0">
-                        ✓ Marquer comme lu
+                        style="cursor:pointer;border:none;background:none;padding:0;">
+                        <i class="fa-solid fa-check"></i> Marquer comme lu
                     </button>
                 {% endif %}
+
             </li>
         {% endfor %}
     </ul>

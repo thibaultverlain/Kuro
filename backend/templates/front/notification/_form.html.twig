@@ -1,4 +1,11 @@
-{{ form_start(form) }}
+{{ form_start(form, {'attr': {'class': 'task-form'}}) }}
+
     {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+
+    <div style="margin-top: 8px;">
+        <button type="submit" class="btn-glass">
+            <i class="fa-solid fa-check"></i> {{ button_label|default('Enregistrer') }}
+        </button>
+    </div>
+
 {{ form_end(form) }}
