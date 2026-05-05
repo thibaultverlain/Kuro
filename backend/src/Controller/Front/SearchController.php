@@ -30,8 +30,7 @@ class SearchController extends AbstractController
         $projects    = $projectRepository->findForUser($currentUser);
         $statuses    = $statusRepository->findAll();
         $tasks       = [];
-
-        $hasFilter = $query !== '' || $statusFilter !== '' || $projectFilter !== '';
+        $hasFilter   = $query !== '' || $statusFilter !== '' || $projectFilter !== '';
 
         if ($hasFilter) {
             $tasks = $taskRepository->search(
