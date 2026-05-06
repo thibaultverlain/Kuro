@@ -4,81 +4,204 @@
     <meta charset="UTF-8">
     <title>{% block title %}Admin — Kuro{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/accueil.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/user.css') }}">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
-        body { font-family: 'DM Sans', system-ui, sans-serif; background: #080610; color: #f0ecff; }
-        .admin-nav { background: #0f0d1a; border-bottom: 1px solid rgba(124,58,255,0.2); padding: 14px 24px; display: flex; align-items: center; gap: 24px; }
-        .admin-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; color: white; text-decoration: none; background: linear-gradient(135deg,#7c3aff,#b14cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .admin-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 2px 8px; border-radius: 999px; background: rgba(124,58,255,0.15); color: #a855f7; border: 1px solid rgba(124,58,255,0.2); }
-        .admin-nav-links { display: flex; gap: 4px; margin-left: 16px; flex-wrap: wrap; }
-        .admin-nav-link { padding: 6px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 500; color: #9d98c0; text-decoration: none; transition: 0.15s; }
-        .admin-nav-link:hover { background: rgba(124,58,255,0.1); color: #a855f7; }
-        .admin-nav-link.active { background: rgba(124,58,255,0.15); color: #a855f7; border: 1px solid rgba(124,58,255,0.2); }
-        .admin-nav-right { margin-left: auto; }
-        .admin-content { max-width: 1200px; margin: 32px auto; padding: 0 24px; }
-        .admin-card { background: #141220; border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 24px; margin-bottom: 20px; position: relative; overflow: hidden; }
-        .admin-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#7c3aff,#06d6ff); }
-        .admin-footer { text-align: center; padding: 24px; color: #5e5a7a; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 40px; }
-        /* Override Bootstrap pour le thème dark */
-        .btn-primary { background: #7c3aff; border-color: #7c3aff; }
-        .btn-primary:hover { background: #6d28d9; border-color: #6d28d9; }
-        .btn-secondary { background: #1a1729; border-color: rgba(255,255,255,0.1); color: #9d98c0; }
-        .btn-secondary:hover { background: #201d30; color: #f0ecff; }
-        .btn-danger { background: #ff3b6b; border-color: #ff3b6b; }
-        .table { color: #f0ecff; }
-        .table-striped>tbody>tr:nth-of-type(odd)>* { background: rgba(255,255,255,0.03); color: #f0ecff; }
-        .table-hover>tbody>tr:hover>* { background: rgba(124,58,255,0.08); }
-        .table>:not(caption)>*>* { border-color: rgba(255,255,255,0.06); }
-        .form-control, .form-select { background: #1a1729; border-color: rgba(124,58,255,0.2); color: #f0ecff; }
-        .form-control:focus, .form-select:focus { background: #141220; border-color: #7c3aff; box-shadow: 0 0 0 3px rgba(124,58,255,0.15); color: #f0ecff; }
-        .form-control::placeholder { color: #5e5a7a; }
-        label { color: #9d98c0; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
-        .alert-success { background: rgba(0,229,160,0.1); border-color: rgba(0,229,160,0.2); color: #00e5a0; }
-        .alert-danger { background: rgba(255,59,107,0.1); border-color: rgba(255,59,107,0.2); color: #ff3b6b; }
-        h1 { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: #f0ecff; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: #12121a;
+            color: #e8e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =========================================================
+           TOPBAR ADMIN
+        ========================================================= */
+        .admin-nav {
+            background: #16161f;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 52px;
+            flex-shrink: 0;
+        }
+
+        .admin-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            font-size: 1rem;
+            color: #2dd4bf;
+            text-decoration: none;
+            letter-spacing: -0.3px;
+        }
+
+        .admin-logo-sq {
+            width: 24px;
+            height: 24px;
+            background: #2dd4bf;
+            border-radius: 5px;
+            flex-shrink: 0;
+        }
+
+        .admin-badge {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(45,212,191,0.1);
+            color: #2dd4bf;
+            border: 1px solid rgba(45,212,191,0.2);
+        }
+
+        .admin-nav-links {
+            display: flex;
+            gap: 2px;
+            margin-left: 12px;
+            flex-wrap: wrap;
+        }
+
+        .admin-nav-link {
+            padding: 6px 10px;
+            border-radius: 7px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: #9898b0;
+            text-decoration: none;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .admin-nav-link:hover {
+            background: rgba(45,212,191,0.08);
+            color: #2dd4bf;
+        }
+
+        .admin-nav-link.active {
+            background: rgba(45,212,191,0.1);
+            color: #2dd4bf;
+            border: 1px solid rgba(45,212,191,0.2);
+        }
+
+        .admin-nav-right { margin-left: auto; display: flex; gap: 2px; }
+
+        /* =========================================================
+           CONTENT
+        ========================================================= */
+        .admin-content {
+            max-width: 1280px;
+            margin: 28px auto;
+            padding: 0 24px;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
+        .admin-footer {
+            text-align: center;
+            padding: 20px;
+            color: #5c5c78;
+            font-size: 12px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: 40px;
+        }
+
+        /* =========================================================
+           BOOTSTRAP OVERRIDES
+        ========================================================= */
+        .form-control, .form-select {
+            background: #212130;
+            border-color: rgba(255,255,255,0.07);
+            color: #e8e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: #1c1c28;
+            border-color: #2dd4bf;
+            box-shadow: 0 0 0 3px rgba(45,212,191,0.1);
+            color: #e8e8f0;
+        }
+
+        .form-control::placeholder { color: #5c5c78; }
+
+        label {
+            color: #9898b0;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .table { color: #e8e8f0; }
+        .table>:not(caption)>*>* { border-color: rgba(255,255,255,0.05); }
+        .table-hover>tbody>tr:hover>* { background: rgba(45,212,191,0.05); }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e8e8f0;
+            letter-spacing: -0.3px;
+        }
     </style>
 </head>
 <body>
 
 <nav class="admin-nav">
-    <a href="{{ path('admin_project_index') }}" class="admin-logo">✦ Kuro</a>
+    <a href="{{ path('admin_project_index') }}" class="admin-logo">
+        <div class="admin-logo-sq"></div>
+        Kuro
+    </a>
     <span class="admin-badge">Admin</span>
 
     <div class="admin-nav-links">
         <a href="{{ path('admin_project_index') }}"
            class="admin-nav-link {{ app.request.attributes.get('_route') starts with 'admin_project' ? 'active' : '' }}">
-            <i class="fa-solid fa-folder me-1"></i>Projets
+            <i class="fa-solid fa-folder"></i> Projets
         </a>
         <a href="{{ path('admin_tasks_index') }}"
            class="admin-nav-link {{ app.request.attributes.get('_route') starts with 'admin_tasks' ? 'active' : '' }}">
-            <i class="fa-solid fa-list-check me-1"></i>Tâches
+            <i class="fa-solid fa-list-check"></i> Tâches
         </a>
         <a href="{{ path('admin_priority_index') }}"
            class="admin-nav-link {{ app.request.attributes.get('_route') starts with 'admin_priority' ? 'active' : '' }}">
-            <i class="fa-solid fa-flag me-1"></i>Priorités
+            <i class="fa-solid fa-flag"></i> Priorités
         </a>
         <a href="{{ path('admin_status_index') }}"
            class="admin-nav-link {{ app.request.attributes.get('_route') starts with 'admin_status' ? 'active' : '' }}">
-            <i class="fa-solid fa-circle-half-stroke me-1"></i>Statuts
+            <i class="fa-solid fa-circle-half-stroke"></i> Statuts
         </a>
         <a href="{{ path('admin_role_index') }}"
            class="admin-nav-link {{ app.request.attributes.get('_route') starts with 'admin_role' ? 'active' : '' }}">
-            <i class="fa-solid fa-shield me-1"></i>Rôles
+            <i class="fa-solid fa-shield-halved"></i> Rôles
         </a>
         <a href="{{ path('user_index') }}"
            class="admin-nav-link {{ app.request.attributes.get('_route') starts with 'user' ? 'active' : '' }}">
-            <i class="fa-solid fa-users me-1"></i>Utilisateurs
+            <i class="fa-solid fa-users"></i> Utilisateurs
         </a>
     </div>
 
     <div class="admin-nav-right">
         <a href="{{ path('front_accueil') }}" class="admin-nav-link">
-            <i class="fa-solid fa-arrow-left me-1"></i>Retour
+            <i class="fa-solid fa-arrow-left"></i> App
         </a>
-        <a href="{{ path('app_logout') }}" class="admin-nav-link" style="color:#ff3b6b">
-            <i class="fa-solid fa-right-from-bracket me-1"></i>Déconnexion
+        <a href="{{ path('app_logout') }}" class="admin-nav-link" style="color:#ef4444;">
+            <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
         </a>
     </div>
 </nav>
@@ -86,7 +209,8 @@
 <div class="admin-content">
     {% for label, messages in app.flashes %}
         {% for message in messages %}
-            <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} mb-3" style="border-radius:10px">
+            <div class="mb-3" style="border-radius:8px;border:1px solid {% if label == 'success' %}rgba(16,185,129,0.3){% else %}rgba(239,68,68,0.3){% endif %};background:{% if label == 'success' %}rgba(16,185,129,0.08){% else %}rgba(239,68,68,0.08){% endif %};color:{% if label == 'success' %}#10b981{% else %}#ef4444{% endif %};padding:12px 16px;font-size:13px;">
+                <i class="fa-solid {% if label == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %} me-2"></i>
                 {{ message }}
             </div>
         {% endfor %}
@@ -96,9 +220,10 @@
 </div>
 
 <footer class="admin-footer">
-    © {{ "now"|date("Y") }} — Kuro
+    © {{ "now"|date("Y") }} — Kuro Admin
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block javascripts %}{% endblock %}
 </body>
 </html>

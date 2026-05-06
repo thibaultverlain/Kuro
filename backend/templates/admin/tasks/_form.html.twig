@@ -1,8 +1,11 @@
-{{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
-    <div class="mb-3">
-        {{ form_widget(form, {'attr': {'class': 'form-control'}}) }}
+{{ form_start(form, {'attr': {'class': 'task-form needs-validation'}}) }}
+
+    {{ form_widget(form) }}
+
+    <div style="margin-top: 8px;">
+        <button type="submit" class="btn-glass">
+            <i class="fa-solid fa-check"></i> {{ button_label|default('Enregistrer') }}
+        </button>
     </div>
-    <button class="btn btn-primary">
-        <i class="bi bi-check-circle"></i> {{ button_label|default('Enregistrer') }}
-    </button>
+
 {{ form_end(form) }}
