@@ -1,4 +1,4 @@
-{% extends 'base_admin.html.twig' %}
+{% extends 'base_front.html.twig' %}
 
 {% block title %}Tâches — Admin Kuro{% endblock %}
 
@@ -10,14 +10,9 @@
             <h1 class="modern-title">Gestion des tâches</h1>
             <p class="header-subtitle">{{ tasks|length }} tâche{{ tasks|length > 1 ? 's' : '' }} au total</p>
         </div>
-        <div style="display:flex;gap:8px;">
-            <a href="{{ path('admin_tasks_new') }}" class="btn-glass">
-                <i class="fa-solid fa-plus"></i> Nouvelle tâche
-            </a>
-            <a href="{{ path('front_project_index') }}" class="btn-reset">
-                <i class="fa-solid fa-folder-open"></i> Via les projets
-            </a>
-        </div>
+        <a href="{{ path('front_project_index') }}" class="btn-glass">
+            <i class="fa-solid fa-folder-open"></i> Créer via les projets
+        </a>
     </div>
 </div>
 
