@@ -19,9 +19,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         parent::__construct($registry, User::class);
     }
 
-    /**
-     * Used to upgrade (rehash) the user's password automatically over time.
-     */
     public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         if (!$user instanceof User) {
@@ -33,37 +30,17 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
-    //    /**
-    //     * @return User[] Returns an array of User objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('u.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?User
-    //    {
-    //        return $this->createQueryBuilder('u')
-    //            ->andWhere('u.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Retourne les utilisateurs ayant le rôle donné.
+     *
+     * @return User[]
+     */
     public function findByRole(string $role): array
     {
         $conn = $this->getEntityManager()->getConnection();
 
         $sql = '
-            SELECT id
-            FROM "user"
+            SELECT id FROM "user"
             WHERE roles::jsonb @> :role::jsonb
         ';
 
@@ -80,5 +57,24 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         return $this->findBy(['id' => $ids]);
     }
 
+    /**
+     * Retourne tous les membres des projets passés en paramètre (sans doublons).
+     *
+     * @param int[] $projectIds
+     * @return User[]
+     */
+    public function findMembersOfProjects(array $projectIds): array
+    {
+        if (empty($projectIds)) {
+            return [];
+        }
 
+        return $this->createQueryBuilder('u')
+            ->innerJoin('u.projects', 'p')
+            ->andWhere('p.id IN (:ids)')
+            ->setParameter('ids', $projectIds)
+            ->orderBy('u.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

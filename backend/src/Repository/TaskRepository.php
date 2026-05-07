@@ -33,7 +33,7 @@ class TaskRepository extends ServiceEntityRepository
 
     /**
      * Recherche et filtre les tâches accessibles à l'utilisateur.
-     * Utilise un double JOIN pour filtrer par membre du projet.
+     * Supporte le filtrage par mot-clé, statut, projet et utilisateur assigné.
      *
      * @return Task[]
      */
@@ -41,13 +41,15 @@ class TaskRepository extends ServiceEntityRepository
         User $currentUser,
         string $query = '',
         ?string $status = null,
-        ?int $projectId = null
+        ?int $projectId = null,
+        ?int $assignedUserId = null
     ): array {
         $qb = $this->createQueryBuilder('t')
             ->distinct()
             ->innerJoin('t.project', 'p')
             ->innerJoin('p.users', 'u')
             ->leftJoin('t.status', 's')
+            ->leftJoin('t.users', 'a')
             ->andWhere('u = :currentUser')
             ->setParameter('currentUser', $currentUser);
 
@@ -64,6 +66,11 @@ class TaskRepository extends ServiceEntityRepository
         if ($projectId !== null) {
             $qb->andWhere('p.id = :projectId')
                ->setParameter('projectId', $projectId);
+        }
+
+        if ($assignedUserId !== null) {
+            $qb->andWhere('a.id = :assignedUser')
+               ->setParameter('assignedUser', $assignedUserId);
         }
 
         return $qb
