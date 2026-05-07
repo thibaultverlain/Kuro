@@ -82,6 +82,7 @@ final class TasksController extends AbstractController
             }
 
             $em->persist($task);
+            $em->flush();
             $history->log($task, 'Tâche créée', $this->getUser());
 
             foreach ($task->getUsers() as $user) {
@@ -102,7 +103,7 @@ final class TasksController extends AbstractController
                 $this->generateUrl('front_tasks_show', ['id' => $task->getId()])
             );
 
-            $em->flush();
+            
 
             return $this->redirectToRoute('front_tasks_by_project', ['id' => $project->getId()]);
         }
