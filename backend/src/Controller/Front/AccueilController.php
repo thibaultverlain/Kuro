@@ -21,16 +21,12 @@ final class AccueilController extends AbstractController
     ): Response {
         $currentUser = $this->getUser();
 
-        // On charge uniquement les projets de l'utilisateur connecté
         $projects = $projectRepository->findForUser($currentUser);
+        $tasks    = $taskRepository->findForUserProjects($currentUser);
+        $users    = $userRepository->findAll();
 
-        // On charge uniquement les tâches des projets de cet utilisateur
-        $tasks = $taskRepository->findForUserProjects($currentUser);
-
-        $users = $userRepository->findAll();
-
+        // Données pour le graphique par projet
         $projectsData = [];
-
         foreach ($tasks as $task) {
             $projectName = $task->getProject()?->getName() ?? 'Sans projet';
             $statusName  = $task->getStatus()?->getName() ?? 'Inconnu';
@@ -49,11 +45,15 @@ final class AccueilController extends AbstractController
             }
         }
 
+        // Données pour le graphique d'activité des 7 derniers jours
+        $activityData = $taskRepository->getActivityLastDays($currentUser, 7);
+
         return $this->render('front/accueil/index.html.twig', [
             'projects'     => $projects,
             'tasks'        => $tasks,
             'users'        => $users,
             'projectsData' => $projectsData,
+            'activityData' => $activityData,
         ]);
     }
 }

@@ -33,7 +33,6 @@ class TaskRepository extends ServiceEntityRepository
 
     /**
      * Recherche et filtre les tâches accessibles à l'utilisateur.
-     * Supporte le filtrage par mot-clé, statut, projet et utilisateur assigné.
      *
      * @return Task[]
      */
@@ -77,5 +76,64 @@ class TaskRepository extends ServiceEntityRepository
             ->orderBy('t.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Retourne le nombre de tâches créées et terminées par jour sur les N derniers jours.
+     * Utilisé pour le graphique d'activité du dashboard.
+     *
+     * @return array{labels: string[], created: int[], completed: int[]}
+     */
+    public function getActivityLastDays(User $user, int $days = 7): array
+    {
+        $labels    = [];
+        $created   = [];
+        $completed = [];
+
+        for ($i = $days - 1; $i >= 0; $i--) {
+            $date = new \DateTimeImmutable("-{$i} days");
+            $labels[]  = $date->format('d/m');
+
+            $dayStart = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $date->format('Y-m-d') . ' 00:00:00');
+            $dayEnd   = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $date->format('Y-m-d') . ' 23:59:59');
+
+            // Tâches créées ce jour
+            $createdCount = (int) $this->createQueryBuilder('t')
+                ->select('COUNT(t.id)')
+                ->innerJoin('t.project', 'p')
+                ->innerJoin('p.users', 'u')
+                ->andWhere('u = :user')
+                ->andWhere('t.createdAt BETWEEN :start AND :end')
+                ->setParameter('user', $user)
+                ->setParameter('start', $dayStart)
+                ->setParameter('end', $dayEnd)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            // Tâches terminées ce jour (lastChangedAt + statut Terminée)
+            $completedCount = (int) $this->createQueryBuilder('t')
+                ->select('COUNT(t.id)')
+                ->innerJoin('t.project', 'p')
+                ->innerJoin('p.users', 'u')
+                ->innerJoin('t.status', 's')
+                ->andWhere('u = :user')
+                ->andWhere('s.name = :done')
+                ->andWhere('t.lastChangedAt BETWEEN :start AND :end')
+                ->setParameter('user', $user)
+                ->setParameter('done', 'Terminée')
+                ->setParameter('start', $dayStart)
+                ->setParameter('end', $dayEnd)
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            $created[]   = $createdCount;
+            $completed[] = $completedCount;
+        }
+
+        return [
+            'labels'    => $labels,
+            'created'   => $created,
+            'completed' => $completed,
+        ];
     }
 }
