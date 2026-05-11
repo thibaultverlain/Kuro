@@ -102,6 +102,12 @@
     </div>
 </div>
 
+<pre style="color:lime;font-size:11px;background:#111;padding:10px;border-radius:8px">
+projectsData: {{ projectsData|json_encode|raw }}
+statusNames: {{ statusNames|json_encode|raw }}
+activityData: {{ activityData|json_encode|raw }}
+</pre>
+
 <script>
 (function() {
     const isDark     = !document.body.classList.contains('light-mode');
