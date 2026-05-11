@@ -3,6 +3,7 @@
 namespace App\Controller\Front;
 
 use App\Repository\ProjectRepository;
+use App\Repository\StatusRepository;
 use App\Repository\TaskRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,41 +18,40 @@ final class AccueilController extends AbstractController
     public function accueil(
         ProjectRepository $projectRepository,
         TaskRepository $taskRepository,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        StatusRepository $statusRepository
     ): Response {
         $currentUser = $this->getUser();
 
-        $projects = $projectRepository->findForUser($currentUser);
-        $tasks    = $taskRepository->findForUserProjects($currentUser);
-        $users    = $userRepository->findAll();
+        $projects    = $projectRepository->findForUser($currentUser);
+        $tasks       = $taskRepository->findForUserProjects($currentUser);
+        $users       = $userRepository->findAll();
+        $statuses    = $statusRepository->findAll();
+        $statusNames = array_map(fn($s) => $s->getName(), $statuses);
 
-        // Données pour le graphique par projet
+        // Données graphique par projet — clés dynamiques depuis la BDD
         $projectsData = [];
         foreach ($tasks as $task) {
             $projectName = $task->getProject()?->getName() ?? 'Sans projet';
             $statusName  = $task->getStatus()?->getName() ?? 'Inconnu';
 
             if (!isset($projectsData[$projectName])) {
-                $projectsData[$projectName] = [
-                    'En cours'  => 0,
-                    'Terminée'  => 0,
-                    'En retard' => 0,
-                    'À faire'   => 0,
-                ];
+                $projectsData[$projectName] = array_fill_keys($statusNames, 0);
             }
 
-            if (array_key_exists($statusName, $projectsData[$projectName])) {
+            if (isset($projectsData[$projectName][$statusName])) {
                 $projectsData[$projectName][$statusName]++;
             }
         }
 
-        // Données pour le graphique d'activité des 7 derniers jours
         $activityData = $taskRepository->getActivityLastDays($currentUser, 7);
 
         return $this->render('front/accueil/index.html.twig', [
             'projects'     => $projects,
             'tasks'        => $tasks,
             'users'        => $users,
+            'statuses'     => $statuses,
+            'statusNames'  => $statusNames,
             'projectsData' => $projectsData,
             'activityData' => $activityData,
         ]);

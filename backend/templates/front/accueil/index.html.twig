@@ -4,7 +4,6 @@
 
 {% block body %}
 
-{# Bloc projets #}
 <div class="dashboard-block mb-4">
     <h2 class="block-title">Mes projets</h2>
     <div class="row">
@@ -32,7 +31,6 @@
     </div>
 </div>
 
-{# Graphiques côte à côte #}
 <div class="row mb-4">
     <div class="col-md-6 mb-3">
         <div class="chart-block-modern">
@@ -48,7 +46,6 @@
     </div>
 </div>
 
-{# Tableau des tâches par utilisateur #}
 <div class="dashboard-block mb-5">
     <h2 class="block-title">Tâches par utilisateur</h2>
     <div class="table-responsive">
@@ -56,48 +53,49 @@
             <thead>
                 <tr>
                     <th>Utilisateur</th>
-                    <th>En cours</th>
-                    <th>À faire</th>
-                    <th>Terminées</th>
-                    <th>En retard</th>
+                    {% for sName in statusNames %}
+                        <th>{{ sName }}</th>
+                    {% endfor %}
                     <th>Total</th>
                 </tr>
             </thead>
             <tbody>
                 {% for user in users %}
-                    {% set enCours = 0 %}
-                    {% set aFaire = 0 %}
-                    {% set terminee = 0 %}
-                    {% set enRetard = 0 %}
+                    {% set counts = {} %}
+                    {% set total = 0 %}
+                    {% for sName in statusNames %}
+                        {% set counts = counts|merge({(sName): 0}) %}
+                    {% endfor %}
 
                     {% for task in tasks %}
                         {% if user.tasks.contains(task) %}
-                            {% set status = task.status ? task.status.name : '' %}
-                            {% if status == 'En cours' %}
-                                {% set enCours = enCours + 1 %}
-                            {% elseif status == 'À faire' %}
-                                {% set aFaire = aFaire + 1 %}
-                            {% elseif status == 'Terminée' %}
-                                {% set terminee = terminee + 1 %}
-                            {% elseif status == 'En retard' %}
-                                {% set enRetard = enRetard + 1 %}
+                            {% set sName = task.status ? task.status.name : 'Inconnu' %}
+                            {% if counts[sName] is defined %}
+                                {% set counts = counts|merge({(sName): counts[sName] + 1}) %}
                             {% endif %}
+                            {% set total = total + 1 %}
                         {% endif %}
                     {% endfor %}
 
-                    {% set total = enCours + aFaire + terminee + enRetard %}
                     {% if total > 0 %}
                     <tr>
                         <td><strong>{{ user.name ?: user.email }}</strong></td>
-                        <td><span class="badge badge-en-cours">{{ enCours }}</span></td>
-                        <td><span class="badge badge-en-attente">{{ aFaire }}</span></td>
-                        <td><span class="badge badge-terminee">{{ terminee }}</span></td>
-                        <td><span class="badge badge-en-retard">{{ enRetard }}</span></td>
+                        {% for sName in statusNames %}
+                            <td>
+                                {% set badgeClass = 'badge-sans-statut' %}
+                                {% if sName == 'En cours' %}{% set badgeClass = 'badge-en-cours' %}
+                                {% elseif sName == 'Terminée' %}{% set badgeClass = 'badge-terminee' %}
+                                {% elseif sName == 'À faire' %}{% set badgeClass = 'badge-en-attente' %}
+                                {% elseif sName == 'En révision' %}{% set badgeClass = 'badge-en-cours' %}
+                                {% endif %}
+                                <span class="badge {{ badgeClass }}">{{ counts[sName] ?? 0 }}</span>
+                            </td>
+                        {% endfor %}
                         <td><strong>{{ total }}</strong></td>
                     </tr>
                     {% endif %}
                 {% else %}
-                    <tr><td colspan="6" style="color:var(--text-muted)">Aucun utilisateur.</td></tr>
+                    <tr><td colspan="{{ statusNames|length + 2 }}" style="color:var(--text-muted)">Aucun utilisateur.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -106,7 +104,7 @@
 
 <script>
 (function() {
-    const isDark = !document.body.classList.contains('light-mode');
+    const isDark     = !document.body.classList.contains('light-mode');
     const gridColor  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
     const tickColor  = isDark ? '#9d98c0' : '#5b5380';
     const legendColor = isDark ? '#9d98c0' : '#5b5380';
@@ -114,30 +112,43 @@
     Chart.defaults.font.family = "'DM Sans', system-ui, sans-serif";
     Chart.defaults.font.size   = 12;
 
+    // Palette de couleurs pour les statuts
+    const palette = [
+        'rgba(6,214,255,0.65)',
+        'rgba(0,229,160,0.65)',
+        'rgba(245,158,11,0.65)',
+        'rgba(124,58,255,0.65)',
+        'rgba(255,59,107,0.65)',
+        'rgba(177,76,255,0.65)',
+    ];
+
     // === Graphique 1 : tâches par projet ===
     const projectsData = {{ projectsData|json_encode|raw }};
+    const statusNames  = {{ statusNames|json_encode|raw }};
     const pLabels = Object.keys(projectsData);
 
-    new Chart(document.getElementById('tasksByProjectChart'), {
-        type: 'bar',
-        data: {
-            labels: pLabels,
-            datasets: [
-                { label: 'En cours',  data: pLabels.map(p => projectsData[p]['En cours']),  backgroundColor: 'rgba(6,214,255,0.6)',   borderRadius: 6 },
-                { label: 'Terminée',  data: pLabels.map(p => projectsData[p]['Terminée']),  backgroundColor: 'rgba(0,229,160,0.6)',   borderRadius: 6 },
-                { label: 'En retard', data: pLabels.map(p => projectsData[p]['En retard']), backgroundColor: 'rgba(255,59,107,0.6)',  borderRadius: 6 },
-                { label: 'À faire',   data: pLabels.map(p => projectsData[p]['À faire']),   backgroundColor: 'rgba(245,158,11,0.6)',  borderRadius: 6 },
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { labels: { color: legendColor, boxWidth: 12 } } },
-            scales: {
-                x: { ticks: { color: tickColor }, grid: { color: gridColor } },
-                y: { min: 0, ticks: { stepSize: 1, color: tickColor }, grid: { color: gridColor } }
+    if (pLabels.length > 0) {
+        new Chart(document.getElementById('tasksByProjectChart'), {
+            type: 'bar',
+            data: {
+                labels: pLabels,
+                datasets: statusNames.map((sName, i) => ({
+                    label: sName,
+                    data: pLabels.map(p => projectsData[p][sName] ?? 0),
+                    backgroundColor: palette[i % palette.length],
+                    borderRadius: 6,
+                }))
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: legendColor, boxWidth: 12 } } },
+                scales: {
+                    x: { ticks: { color: tickColor }, grid: { color: gridColor } },
+                    y: { min: 0, ticks: { stepSize: 1, color: tickColor }, grid: { color: gridColor } }
+                }
             }
-        }
-    });
+        });
+    }
 
     // === Graphique 2 : activité 7 jours ===
     const activityData = {{ activityData|json_encode|raw }};
