@@ -102,23 +102,20 @@
     </div>
 </div>
 
-<pre style="color:lime;font-size:11px;background:#111;padding:10px;border-radius:8px">
-projectsData: {{ projectsData|json_encode|raw }}
-statusNames: {{ statusNames|json_encode|raw }}
-activityData: {{ activityData|json_encode|raw }}
-</pre>
+{% endblock %}
 
+{% block javascripts %}
+{{ parent() }}
 <script>
-(function() {
-    const isDark     = !document.body.classList.contains('light-mode');
-    const gridColor  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-    const tickColor  = isDark ? '#9d98c0' : '#5b5380';
+document.addEventListener('DOMContentLoaded', function () {
+    const isDark      = !document.body.classList.contains('light-mode');
+    const gridColor   = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    const tickColor   = isDark ? '#9d98c0' : '#5b5380';
     const legendColor = isDark ? '#9d98c0' : '#5b5380';
 
     Chart.defaults.font.family = "'DM Sans', system-ui, sans-serif";
     Chart.defaults.font.size   = 12;
 
-    // Palette de couleurs pour les statuts
     const palette = [
         'rgba(6,214,255,0.65)',
         'rgba(0,229,160,0.65)',
@@ -197,6 +194,6 @@ activityData: {{ activityData|json_encode|raw }}
             }
         }
     });
-})();
+});
 </script>
 {% endblock %}
