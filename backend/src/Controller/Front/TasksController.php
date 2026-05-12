@@ -82,28 +82,43 @@ final class TasksController extends AbstractController
             }
 
             $em->persist($task);
-            $em->flush();
+            $em->flush(); // flush d'abord pour obtenir l'ID de la tâche
+
             $history->log($task, 'Tâche créée', $this->getUser());
 
+            $creatorName = $this->getUser()->getName() ?: $this->getUser()->getEmail();
+            $taskUrl     = $this->generateUrl('front_tasks_show', ['id' => $task->getId()]);
+
+            // Notifier les membres assignés
             foreach ($task->getUsers() as $user) {
                 if ($user !== $this->getUser()) {
                     $notificationService->notify(
                         $user,
                         'task_assigned',
-                        sprintf('%s vous a assigné la tâche "%s" dans le projet "%s".', $this->getUser()->getName(), $task->getTitle(), $project->getName()),
-                        $this->generateUrl('front_tasks_show', ['id' => $task->getId()])
+                        sprintf(
+                            '%s vous a assigné la tâche "%s" dans le projet "%s".',
+                            $creatorName,
+                            $task->getTitle(),
+                            $project->getName()
+                        ),
+                        $taskUrl
                     );
                 }
             }
 
+            // Confirmer à l'auteur
             $notificationService->notify(
                 $this->getUser(),
                 'task_created',
-                sprintf('Vous avez créé la tâche "%s" dans le projet "%s".', $task->getTitle(), $project->getName()),
-                $this->generateUrl('front_tasks_show', ['id' => $task->getId()])
+                sprintf(
+                    'Vous avez créé la tâche "%s" dans le projet "%s".',
+                    $task->getTitle(),
+                    $project->getName()
+                ),
+                $taskUrl
             );
 
-            
+            $em->flush(); // flush les notifications
 
             return $this->redirectToRoute('front_tasks_by_project', ['id' => $project->getId()]);
         }
@@ -144,22 +159,52 @@ final class TasksController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $history->log($task, 'Tâche modifiée', $this->getUser());
 
+            $editorName = $this->getUser()->getName() ?: $this->getUser()->getEmail();
+            $taskUrl    = $this->generateUrl('front_tasks_show', ['id' => $task->getId()]);
+
+            // Notifier les nouveaux membres assignés
             foreach ($task->getUsers() as $user) {
                 if (!$oldUsers->contains($user) && $user !== $this->getUser()) {
                     $notificationService->notify(
                         $user,
                         'task_assigned',
-                        sprintf('%s vous a ajouté à la tâche "%s" dans le projet "%s".', $this->getUser()->getName(), $task->getTitle(), $task->getProject()->getName()),
-                        $this->generateUrl('front_tasks_show', ['id' => $task->getId()])
+                        sprintf(
+                            '%s vous a ajouté à la tâche "%s" dans le projet "%s".',
+                            $editorName,
+                            $task->getTitle(),
+                            $task->getProject()->getName()
+                        ),
+                        $taskUrl
                     );
                 }
             }
 
+            // Notifier les membres qui ont été retirés
+            foreach ($oldUsers as $user) {
+                if (!$task->getUsers()->contains($user) && $user !== $this->getUser()) {
+                    $notificationService->notify(
+                        $user,
+                        'task_updated',
+                        sprintf(
+                            'Vous avez été retiré de la tâche "%s" dans le projet "%s".',
+                            $task->getTitle(),
+                            $task->getProject()->getName()
+                        ),
+                        null
+                    );
+                }
+            }
+
+            // Confirmer à l'auteur de la modification
             $notificationService->notify(
                 $this->getUser(),
                 'task_updated',
-                sprintf('Vous avez modifié la tâche "%s" dans le projet "%s".', $task->getTitle(), $task->getProject()->getName()),
-                $this->generateUrl('front_tasks_show', ['id' => $task->getId()])
+                sprintf(
+                    'Vous avez modifié la tâche "%s" dans le projet "%s".',
+                    $task->getTitle(),
+                    $task->getProject()->getName()
+                ),
+                $taskUrl
             );
 
             $em->flush();
@@ -178,7 +223,8 @@ final class TasksController extends AbstractController
         Request $request,
         Task $task,
         EntityManagerInterface $em,
-        TaskHistoryService $history
+        TaskHistoryService $history,
+        NotificationService $notificationService
     ): JsonResponse {
         $this->denyAccessUnlessGranted(ProjectVoter::EDIT, $task->getProject());
 
@@ -198,8 +244,31 @@ final class TasksController extends AbstractController
             return new JsonResponse(['error' => 'Statut inconnu'], 400);
         }
 
+        $oldStatusName = $task->getStatus()?->getName() ?? 'Inconnu';
         $task->setStatus($status);
-        $history->log($task, "Statut modifié en : $newStatusName", $this->getUser());
+        $history->log($task, sprintf('Statut modifié : "%s" → "%s"', $oldStatusName, $newStatusName), $this->getUser());
+
+        $editorName = $this->getUser()->getName() ?: $this->getUser()->getEmail();
+        $taskUrl    = $this->generateUrl('front_tasks_show', ['id' => $task->getId()]);
+
+        // Notifier les membres assignés du changement de statut
+        foreach ($task->getUsers() as $user) {
+            if ($user !== $this->getUser()) {
+                $notificationService->notify(
+                    $user,
+                    'task_updated',
+                    sprintf(
+                        '%s a changé le statut de "%s" en "%s" pour la tâche "%s".',
+                        $editorName,
+                        $oldStatusName,
+                        $newStatusName,
+                        $task->getTitle()
+                    ),
+                    $taskUrl
+                );
+            }
+        }
+
         $em->flush();
 
         return new JsonResponse(['success' => true]);
@@ -210,16 +279,41 @@ final class TasksController extends AbstractController
         Request $request,
         Task $task,
         EntityManagerInterface $em,
-        TaskHistoryService $history
+        TaskHistoryService $history,
+        NotificationService $notificationService
     ): Response {
         $this->denyAccessUnlessGranted(ProjectVoter::DELETE, $task->getProject());
 
         $project = $task->getProject();
 
         if ($this->isCsrfTokenValid('delete' . $task->getId(), $request->request->get('_token'))) {
+            $deleterName  = $this->getUser()->getName() ?: $this->getUser()->getEmail();
+            $taskTitle    = $task->getTitle();
+            $projectName  = $project->getName();
+            $assignedUsers = $task->getUsers()->toArray();
+
             $history->log($task, 'Tâche supprimée', $this->getUser());
+
+            // Notifier les membres assignés avant la suppression
+            foreach ($assignedUsers as $user) {
+                if ($user !== $this->getUser()) {
+                    $notificationService->notify(
+                        $user,
+                        'task_deleted',
+                        sprintf(
+                            '%s a supprimé la tâche "%s" du projet "%s".',
+                            $deleterName,
+                            $taskTitle,
+                            $projectName
+                        ),
+                        null // pas de lien, la tâche n'existe plus
+                    );
+                }
+            }
+
+            $em->flush(); // flush les notifications d'abord
             $em->remove($task);
-            $em->flush();
+            $em->flush(); // puis supprimer la tâche
         }
 
         return $this->redirectToRoute('front_tasks_by_project', ['id' => $project->getId()]);
