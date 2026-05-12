@@ -182,28 +182,13 @@ body {
 
 .logo-box {
     background: transparent;
-    color: var(--teal);
-    padding: 4px 4px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 800;
-    font-size: 1.2rem;
-    letter-spacing: -0.5px;
+    padding: 4px;
     display: flex;
     align-items: center;
-    gap: 8px;
 }
 
-.logo-box::before {
-    content: '';
-    width: 28px;
-    height: 28px;
-    background: var(--grad-teal);
-    border-radius: var(--r-sm);
-    display: inline-block;
-    flex-shrink: 0;
-}
-
-.logo-box::after { display: none; }
+.logo-box::before { display: none; }
+.logo-box::after  { display: none; }
 
 .sidebar-actions {
     display: flex;

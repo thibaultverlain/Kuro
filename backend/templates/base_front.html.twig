@@ -24,7 +24,9 @@
         {% if app.user %}
         <nav class="sidebar">
             <div class="sidebar-header">
-                {{ asset('images/kuro_logo.svg') }}
+                <div class="logo-box">
+                    <img src="{{ asset('images/kuro_logo.svg') }}" alt="Kuro" height="36">
+                </div>
 
                 <div class="sidebar-actions">
                     <div class="notif-wrapper">
