@@ -18,7 +18,7 @@
         font-weight="700"
         font-size="46"
         letter-spacing="-2"
-        fill="#e8e8f0">Kuro</text>
+        fill="currentColor">Kuro</text>
 
   <!-- Tagline -->
   <text x="110" y="80"
@@ -26,6 +26,7 @@
         font-weight="400"
         font-size="11"
         letter-spacing="4"
-        fill="#9898b0">PROJECT MANAGER</text>
+        fill="currentColor"
+        opacity="0.5">PROJECT MANAGER</text>
 
 </svg>
